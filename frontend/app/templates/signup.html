@@ -1,8 +1,13 @@
 {% extends "base.html" %}
 
+{% block custom_style %}
+ <!-- Custom styles for this template -->
+    <link href="/static/signup.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<div class="column is-4 is-offset-4">
-    <h3 class="title">Sign Up</h3>
+<div class="form-signup">
+    <h3 class="title">Registro</h3>
     <div class="box">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -14,25 +19,21 @@
 
         <form method="POST" action="/signup">
             {{ form.hidden_tag() }}
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="email" name="email" placeholder="Email" autofocus="">
-                </div>
+
+            <div class="form-floating">
+                <input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+                <label for="floatingInput">Correo electrónico</label>
+            </div>
+            <div class="form-floating">
+                <input type="text" name="name" class="form-control" id="floatingInput" placeholder="Nombre">
+                <label for="floatingInput">Nombre</label>
+            </div>
+            <div class="form-floating">
+                <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Contraseña">
+                <label for="floatingPassword">Contraseña</label>
             </div>
 
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="text" name="name" placeholder="Name" autofocus="">
-                </div>
-            </div>
-
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="password" name="password" placeholder="Password">
-                </div>
-            </div>
-
-            <button class="button is-block is-info is-large is-fullwidth" type="submit"> Sign Up</button>
+              <button class="w-100 btn btn-lg btn-primary" type="submit">Registrar</button>
         </form>
     </div>
 </div>

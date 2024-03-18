@@ -9,6 +9,9 @@ from models import users, User
 # Login
 from forms import LoginForm
 
+# Registro
+from forms import RegistrationForm
+
 app = Flask(__name__, static_url_path='')
 login_manager = LoginManager()
 login_manager.init_app(app) # Para mantener la sesión
@@ -44,6 +47,17 @@ def login():
                 return redirect(url_for('index'))
 
         return render_template('login.html', form=form,  error=error)
+    
+@app.route('/signup', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    else:
+        error = None
+        form = RegistrationForm(None if request.method != 'POST' else request.form)
+        if request.method == "POST" and form.validate():
+            user = User()
+        return render_template('signup.html', form=form, error=error)
 
 @app.route('/profile')
 @login_required
