@@ -1,0 +1,25 @@
+html,
+body {
+  height: 100%;
+}
+
+.textarea-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+#prompt {
+  width: 100%;
+  resize: none;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 75px; /* Evitar que el texto se solape con el botón */
+}
+
+.btn-inside-textarea {
+  position: absolute;
+  right: 23px; /* Distancia desde la derecha */
+  bottom: 10px; /* Distancia desde el fondo */
+  z-index: 2;
+}

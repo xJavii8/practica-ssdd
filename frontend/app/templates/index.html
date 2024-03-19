@@ -1,10 +1,27 @@
 {% extends "base.html" %}
 
+{% block custom_style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}" />
+{% endblock %}
+
 {% block content %}
 <h1 class="mt-5">
-    Flask Login Example
+    LlamaChat
 </h1>
 <p class="lead">
-    Create a Login page using Flask :)
+    {% if current_user.is_authenticated %}
+        Bienvenido
+    {% else %}
+        Inicia sesión para crear sesión de prompts
+    {% endif %}
 </p>
+{% if current_user.is_authenticated %}
+    <form method="POST">
+        <div class="textarea-wrapper">
+            <textarea id="prompt" class="form-control" placeholder="Mensaje..." oninput="ajustarAltura(this)"></textarea>
+            <button id="send" class="btn btn-primary btn-inside-textarea" type="submit">Enviar</button>
+        </div>
+        <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+    </form>
+{% endif %}
 {% endblock %}
