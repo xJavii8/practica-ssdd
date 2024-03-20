@@ -2,15 +2,20 @@ from flask import Flask, render_template, send_from_directory, url_for, request,
 from flask_login import LoginManager, login_manager, current_user, login_user, login_required, logout_user
 import requests
 import os
+import logging
 
 # Usuarios
 from models import users, User
 
 # Login
-from forms import LoginForm
+from forms import LoginForm, RegistrationForm
 
-# Registro
-from forms import RegistrationForm
+# Workaround: Login
+import hashlib
+
+# Configuración del logger
+logging.basicConfig(format="%(filename)s:%(lineno)d - %(levelname)s - %(message)s")
+logging.getLogger().setLevel(logging.INFO)
 
 app = Flask(__name__, static_url_path='')
 login_manager = LoginManager()
@@ -25,8 +30,12 @@ app.config['SECRET_KEY'] = 'qH1vprMjavek52cv7Lmfe1FoCexrrV8egFnB21jHhkuOHm8hJUe1
 def serve_static(path):
     return send_from_directory('static', path)
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == "POST":
+        logging.info('REQUEST DATA: ' + request.form['textarea'])
+        # Falta la lógica para mandar al REST 
+        pass
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -37,15 +46,19 @@ def login():
         error = None
         form = LoginForm(None if request.method != 'POST' else request.form)
         if request.method == "POST" and form.validate():
-            if form.email.data != 'admin@um.es' or form.password.data != 'admin':
-                error = 'Invalid Credentials. Please try again.'
-            else:
-                user = User(1, 'admin', form.email.data.encode('utf-8'),
-                            form.password.data.encode('utf-8'))
+            loginData = {"email": form.email.data, "password": form.password.data}
+            loginPOST = requests.post('http://backend-rest:8080/Service/checkLogin', json=loginData)
+            if loginPOST.status_code == 200:
+                json = loginPOST.json()
+                logging.info(json)
+                # Esto es un workaround. Este parseo a int debería de hacerse al registrarse
+                user = User(int(hashlib.md5(json['id'].encode()).hexdigest(), 16), json['name'], json['email'], form.password.data.encode('utf-8'), True if json['name'] == "diego" else False)
+                # user = User(json['id'], json['name'], json['email'], form.password.data.encode('utf-8'))
                 users.append(user)
                 login_user(user, remember=form.remember_me.data)
                 return redirect(url_for('index'))
-
+            else:
+                error = "Credenciales incorrectas. Vuelve a intentarlo"
         return render_template('login.html', form=form,  error=error)
     
 @app.route('/signup', methods=['GET', 'POST'])
