@@ -51,8 +51,18 @@ public class SQLUserDAO implements IUserDAO
     @Override
     public Optional<User> getUserById(String id)
     {
+        PreparedStatement stm;
+        try{
+            stm = conn.get().prepareStatement("SELECT * from users WHERE id = ?");
+            stm.setString(1, id);
+            ResultSet result = stm.executeQuery();
+            if (result.next())
+                return createUser(result);
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
         // TODO Auto-generated method stub
-        return null;
+        return Optional.empty();
     }
 
     @Override
@@ -72,7 +82,32 @@ public class SQLUserDAO implements IUserDAO
         }
         return Optional.empty();
     }
-
+    @Override
+    public Optional<User> crearUser(User u){
+        PreparedStatement stm;
+        try {
+            //Prepare insert statement
+            stm = conn.get().prepareStatement("INSERT INTO users (email, password_hash, name, token, visits) VALUES (?,?,?,?,?); SELECT LAST_INSERT_ID()");
+            stm.setString(1, u.getEmail());
+            stm.setString(2, u.getPassword_hash());
+            stm.setString(3, u.getName());
+            stm.setString(4, u.getToken());
+            stm.setInt(5, u.getVisits());
+            int result = stm.executeUpdate();
+            if (result == 1){
+                //If success retrieve id from database
+                ResultSet set = stm.getGeneratedKeys();
+                if (set.next()){
+                    return Optional.of(new User(set.getString(1), u.getEmail(), u.getPassword_hash(), u.getName(), u.getName(), u.getVisits()));
+                }
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+        
     private Optional<User> createUser(ResultSet result)
     {
         try

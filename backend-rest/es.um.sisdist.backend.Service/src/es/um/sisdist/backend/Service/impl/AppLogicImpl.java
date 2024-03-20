@@ -3,11 +3,20 @@
  */
 package es.um.sisdist.backend.Service.impl;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import org.glassfish.jersey.internal.util.Tokenizer;
+import org.glassfish.jersey.message.internal.Token;
+
+import com.google.protobuf.Option;
+
 import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
 import es.um.sisdist.backend.grpc.PingRequest;
+import es.um.sisdist.models.UserDTO;
+import es.um.sisdist.models.UserDTOUtils;
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
 import es.um.sisdist.backend.dao.IDAOFactory;
 import es.um.sisdist.backend.dao.models.User;
@@ -26,7 +35,8 @@ public class AppLogicImpl
     IUserDAO dao;
 
     private static final Logger logger = Logger.getLogger(AppLogicImpl.class.getName());
-
+    private static final SecureRandom secureRandom = new SecureRandom(); //threadsafe
+    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder(); //threadsafe
     private final ManagedChannel channel;
     private final GrpcServiceGrpc.GrpcServiceBlockingStub blockingStub;
     //private final GrpcServiceGrpc.GrpcServiceStub asyncStub;
@@ -98,5 +108,25 @@ public class AppLogicImpl
         }
 
         return Optional.empty();
+    }
+    //El frontend, a traves del formulario de registro,
+    //envia el usurio, su email y el pass, el id se saca del mysql (el que tengas)
+    //el token se genera aleatoriamente. se comprueba que el email no este en uso
+    public Optional<User> createUser(String email, String name, String pass){
+        Optional<User> u;
+        u = dao.getUserByEmail(email);
+        if (!u.isPresent()){
+            u = dao.crearUser(new User(email, pass, name, generarToken(), 0));
+            if (u.isPresent()){
+                return u;
+            }
+        }
+        return Optional.empty();
+    }
+    
+    private String generarToken(){
+        byte[] randomBytes = new byte[24];
+        secureRandom.nextBytes(randomBytes);
+        return base64Encoder.encodeToString(randomBytes);
     }
 }
