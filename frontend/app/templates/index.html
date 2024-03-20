@@ -10,18 +10,18 @@
 </h1>
 <p class="lead">
     {% if current_user.is_authenticated %}
-        Bienvenido
+        Bienvenido.
     {% else %}
         Inicia sesión para crear sesión de prompts
     {% endif %}
 </p>
-{% if current_user.is_authenticated %}
+
     <form method="POST">
         <div class="textarea-wrapper">
-            <textarea id="prompt" class="form-control" placeholder="Mensaje..." oninput="ajustarAltura(this)"></textarea>
+            <textarea id="prompt" name="textarea" class="form-control" placeholder="Mensaje..." oninput="ajustarAltura(this)"></textarea>
             <button id="send" class="btn btn-primary btn-inside-textarea" type="submit">Enviar</button>
         </div>
         <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
     </form>
-{% endif %}
+
 {% endblock %}
