@@ -17,7 +17,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 //Pojo no interface no extend
-@Path("/checkLogin")
+@Path("/register")
 public class RegisterUserEndpoint {
     private AppLogicImpl impl = AppLogicImpl.getInstance();
     @POST
