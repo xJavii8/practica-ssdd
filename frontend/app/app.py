@@ -50,10 +50,7 @@ def login():
             loginPOST = requests.post('http://backend-rest:8080/Service/checkLogin', json=loginData)
             if loginPOST.status_code == 200:
                 json = loginPOST.json()
-                logging.info(json)
-                # Esto es un workaround. Este parseo a int debería de hacerse al registrarse
-                user = User(int(hashlib.md5(json['id'].encode()).hexdigest(), 16), json['name'], json['email'], form.password.data.encode('utf-8'), True if json['name'] == "diego" else False)
-                # user = User(json['id'], json['name'], json['email'], form.password.data.encode('utf-8'))
+                user = User(int(json['id'], 16), json['name'], json['email'], form.password.data.encode('utf-8'))
                 users.append(user)
                 login_user(user, remember=form.remember_me.data)
                 return redirect(url_for('index'))
@@ -69,7 +66,16 @@ def register():
         error = None
         form = RegistrationForm(None if request.method != 'POST' else request.form)
         if request.method == "POST" and form.validate():
-            user = User()
+            registerData = {"email": form.email.data, "name": form.name.data, "password": form.password.data}
+            registerPOST = requests.post('http://backend-rest:8080/Service/register', json=registerData)
+            if registerPOST.status_code == 200:
+                json = registerPOST.json()
+                user = User(int(json['id'], 16), json['name'], json['email'], form.password.data.encode('utf-8'))
+                users.append(user)
+                login_user(user)
+                return redirect(url_for('index'))
+            else:
+                error = "Este usuario ya existe."
         return render_template('signup.html', form=form, error=error)
 
 @app.route('/profile')

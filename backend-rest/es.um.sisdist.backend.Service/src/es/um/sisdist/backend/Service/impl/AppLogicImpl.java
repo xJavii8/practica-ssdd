@@ -113,20 +113,14 @@ public class AppLogicImpl
     //envia el usurio, su email y el pass, el id se saca del mysql (el que tengas)
     //el token se genera aleatoriamente. se comprueba que el email no este en uso
     public Optional<User> createUser(String email, String name, String pass){
-        Optional<User> u;
-        u = dao.getUserByEmail(email);
-        if (!u.isPresent()){
-            u = dao.crearUser(new User(email, pass, name, generarToken(), 0));
+        Optional<User> u = dao.getUserByEmail(email);
+
+        if (!u.isPresent()) {
+            u = dao.crearUser(email, pass, name);
             if (u.isPresent()){
                 return u;
             }
         }
         return Optional.empty();
-    }
-    
-    private String generarToken(){
-        byte[] randomBytes = new byte[24];
-        secureRandom.nextBytes(randomBytes);
-        return base64Encoder.encodeToString(randomBytes);
     }
 }

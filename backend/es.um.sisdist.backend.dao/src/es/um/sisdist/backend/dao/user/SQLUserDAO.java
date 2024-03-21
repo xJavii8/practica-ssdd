@@ -9,9 +9,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import es.um.sisdist.backend.dao.models.User;
+import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.utils.Lazy;
 
 /**
@@ -82,24 +84,24 @@ public class SQLUserDAO implements IUserDAO
         }
         return Optional.empty();
     }
+
     @Override
-    public Optional<User> crearUser(User u){
+    public Optional<User> crearUser(String email, String password, String name) {
         PreparedStatement stm;
         try {
             //Prepare insert statement
-            stm = conn.get().prepareStatement("INSERT INTO users (email, password_hash, name, token, visits) VALUES (?,?,?,?,?); SELECT LAST_INSERT_ID()");
-            stm.setString(1, u.getEmail());
-            stm.setString(2, u.getPassword_hash());
-            stm.setString(3, u.getName());
-            stm.setString(4, u.getToken());
-            stm.setInt(5, u.getVisits());
+            stm = conn.get().prepareStatement("INSERT INTO users (id, email, password_hash, name, token, visits) VALUES (?,?,?,?,?,?);");
+            String userID = UserUtils.md5pass(email);
+            String token = UUID.randomUUID().toString();
+            stm.setString(1, userID);
+            stm.setString(2, email);
+            stm.setString(3, UserUtils.md5pass(password));
+            stm.setString(4, name);
+            stm.setString(5, token);
+            stm.setInt(6, 0);
             int result = stm.executeUpdate();
-            if (result == 1){
-                //If success retrieve id from database
-                ResultSet set = stm.getGeneratedKeys();
-                if (set.next()){
-                    return Optional.of(new User(set.getString(1), u.getEmail(), u.getPassword_hash(), u.getName(), u.getName(), u.getVisits()));
-                }
+            if (result == 1) {
+                return Optional.of(new User(userID, email, UserUtils.md5pass(password), name, token, 0));
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block

@@ -69,7 +69,7 @@ public class MongoUserDAO implements IUserDAO
     }
 
     @Override
-    public Optional<User> crearUser(User u) {
+    public Optional<User> crearUser(String email, String password, String name) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'crearUser'");
     }

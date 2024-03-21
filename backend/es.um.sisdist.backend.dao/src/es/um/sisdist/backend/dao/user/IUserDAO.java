@@ -10,5 +10,5 @@ public interface IUserDAO
 
     public Optional<User> getUserByEmail(String id);
 
-    public Optional<User> crearUser(User u);
+    public Optional<User> crearUser(String email, String password, String name);
 }

@@ -35,6 +35,10 @@
 
               <button class="w-100 btn btn-lg btn-primary" type="submit">Registrar</button>
         </form>
+
+        {% if error %}
+            <p class="error"><strong>Error:</strong> {{ error }}</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
