@@ -45,4 +45,12 @@ public class UsersEndpoint
         }
 
     }
+
+    @POST
+    @Path("/postTest")
+    public String postTEST(){
+        String test = impl.testPOST();
+
+        return test;
+    }
 }

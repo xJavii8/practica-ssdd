@@ -31,7 +31,7 @@
 
 package es.um.sisdist.backend.grpc;
 
-/*
+
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -44,19 +44,19 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
-*/
+
 
 /**
  * A simple client that requests a greeting from the {@link CollageServer}.
  */
 public class GrpcServiceClient 
 {
-	/*
+	
   private static final Logger logger = Logger.getLogger(GrpcServiceClient.class.getName());
 
   private final ManagedChannel channel;
   private final GrpcServiceGrpc.GrpcServiceBlockingStub blockingStub;
-  private final GrpcServiceGrpc.GrpcServiceStub asyncStub;
+  // private final GrpcServiceGrpc.GrpcServiceStub asyncStub;
   
   // Construct client connecting to HelloWorld server at {@code host:port}. 
   public GrpcServiceClient(String host, int port) 
@@ -67,14 +67,29 @@ public class GrpcServiceClient
         .usePlaintext()
         .build();
     blockingStub = GrpcServiceGrpc.newBlockingStub(channel);
-    asyncStub = GrpcServiceGrpc.newStub(channel);
+    // asyncStub = GrpcServiceGrpc.newStub(channel);
   }
 
   public void shutdown() throws InterruptedException {
     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
   }
+
+  public void testPOST() {
+
+	POSTRequest req1 = POSTRequest.newBuilder().setPrompt("Hola! Esto es un test").build();
+	POSTResponse resp1;
+
+	try {
+		resp1 = blockingStub.promptPOST(req1);
+	} catch (StatusRuntimeException e) {
+		return;
+	}
+
+	logger.info("RESPUESTA: " + resp1.getLocalization());
+	
+  }
   
-  // Send images. 
+  /*// Send images. 
   public void sendImagesAndGetCollage()
   {
 	  // Imágenes para enviar
@@ -131,7 +146,7 @@ public class GrpcServiceClient
 		e.printStackTrace();
 	}
 
-  }
+  }*/
 
   // * Collage client
   public static void main(String[] args) throws Exception {
@@ -140,10 +155,10 @@ public class GrpcServiceClient
                         50051);
     try {
       // Access a service running on the local machine on port 50051 
-      client.sendImagesAndGetCollage();
+      client.testPOST();
     } finally {
       client.shutdown();
     }
   }
-  */
+  
 }

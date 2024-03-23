@@ -13,7 +13,11 @@ import org.glassfish.jersey.message.internal.Token;
 
 import com.google.protobuf.Option;
 
+import es.um.sisdist.backend.grpc.GETRequest;
+import es.um.sisdist.backend.grpc.GETResponse;
 import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
+import es.um.sisdist.backend.grpc.POSTRequest;
+import es.um.sisdist.backend.grpc.POSTResponse;
 import es.um.sisdist.backend.grpc.PingRequest;
 import es.um.sisdist.models.UserDTO;
 import es.um.sisdist.models.UserDTOUtils;
@@ -24,6 +28,7 @@ import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.user.IUserDAO;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 
 /**
  * @author dsevilla
@@ -122,5 +127,33 @@ public class AppLogicImpl
             }
         }
         return Optional.empty();
+    }
+
+    public String testPOST() {
+
+        POSTRequest req1 = POSTRequest.newBuilder().setPrompt("Hola! Esto es un test").build();
+        POSTResponse resp1;
+
+        GETResponse resp2;
+        String answer = "";
+
+        try {
+            resp1 = blockingStub.promptPOST(req1);
+            
+            logger.info("RESPUESTA POST: " + resp1.getLocalization());
+            
+            GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).build();
+
+            resp2 = blockingStub.promptGET(req2);
+            
+            logger.info("RESPUESTA GET: " + resp2.getAnswerText());
+
+            answer = resp2.getAnswerText();
+            
+        } catch (StatusRuntimeException e) {
+            return "";
+        }
+        
+        return answer;
     }
 }
