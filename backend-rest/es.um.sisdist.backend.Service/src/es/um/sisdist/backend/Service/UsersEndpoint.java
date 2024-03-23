@@ -44,5 +44,4 @@ public class UsersEndpoint
             return Response.status(Status.CONFLICT).build();
         }
     }
-
 }

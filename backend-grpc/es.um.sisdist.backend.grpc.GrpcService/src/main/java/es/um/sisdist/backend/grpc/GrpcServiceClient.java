@@ -57,7 +57,7 @@ public class GrpcServiceClient
 
   private final ManagedChannel channel;
   private final GrpcServiceGrpc.GrpcServiceBlockingStub blockingStub;
-  private final GrpcServiceGrpc.GrpcServiceStub asyncStub;
+  // private final GrpcServiceGrpc.GrpcServiceStub asyncStub;
   
   // Construct client connecting to HelloWorld server at {@code host:port}. 
   public GrpcServiceClient(String host, int port) 
@@ -68,7 +68,7 @@ public class GrpcServiceClient
         .usePlaintext()
         .build();
     blockingStub = GrpcServiceGrpc.newBlockingStub(channel);
-    asyncStub = GrpcServiceGrpc.newStub(channel);
+    // asyncStub = GrpcServiceGrpc.newStub(channel);
   }
 
   public void shutdown() throws InterruptedException {
@@ -146,6 +146,8 @@ public class GrpcServiceClient
     } finally {
       client.shutdown();
     }
-  }
-*/
+<<<<
+=======
+  }*/
+
 }
