@@ -43,6 +43,6 @@ public class UsersEndpoint
             //Error 409 si email ya existe.
             return Response.status(Status.CONFLICT).build();
         }
-
     }
+
 }

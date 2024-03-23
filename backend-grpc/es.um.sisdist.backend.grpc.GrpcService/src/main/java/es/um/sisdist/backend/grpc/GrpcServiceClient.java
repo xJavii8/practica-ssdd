@@ -31,7 +31,7 @@
 
 package es.um.sisdist.backend.grpc;
 
-/*
+
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -44,14 +44,15 @@ import java.util.logging.Logger;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
-*/
+
 
 /**
  * A simple client that requests a greeting from the {@link CollageServer}.
  */
 public class GrpcServiceClient 
 {
-	/*
+	/* 
+
   private static final Logger logger = Logger.getLogger(GrpcServiceClient.class.getName());
 
   private final ManagedChannel channel;
@@ -132,7 +133,8 @@ public class GrpcServiceClient
 	}
 
   }
-
+*/
+/* 
   // * Collage client
   public static void main(String[] args) throws Exception {
     GrpcServiceClient client = 
@@ -145,5 +147,5 @@ public class GrpcServiceClient
       client.shutdown();
     }
   }
-  */
+*/
 }

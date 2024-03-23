@@ -24,9 +24,7 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 		responseObserver.onNext(PingResponse.newBuilder().setV(request.getV()).build());
 		responseObserver.onCompleted();
 	}
-
-
-/*
+/* 
 	@Override
 	public void storeImage(ImageData request, StreamObserver<Empty> responseObserver)
     {

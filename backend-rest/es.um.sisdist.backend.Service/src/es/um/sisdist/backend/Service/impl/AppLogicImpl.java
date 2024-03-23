@@ -123,4 +123,25 @@ public class AppLogicImpl
         }
         return Optional.empty();
     }
+    public boolean deleteUser(String id){
+        return dao.deleteUser(id);
+    }
+    //TODO, ya lo cambiare por una implementacion mas pulida
+    public Optional<User> modifyUser(String id, String email, String name, String token, String password, int visits) {
+        Optional<User> u = dao.getUserById(id);
+        if(u.isPresent()){
+            return dao.modifyUser(new User(id,email,UserUtils.md5pass(password),name,token,visits));
+        }
+        return Optional.empty();
+    }
+    //Actualizar visitas podria ser una funcion muy recurrente
+    public Optional<User> modifyUserVisits(String id, int visits){
+        Optional<User> u = dao.getUserById(id);
+        if(u.isPresent()){
+            u.get().setVisits(visits);
+            return dao.modifyUser(u.get());
+        }
+        return Optional.empty();
+    }
 }
+    

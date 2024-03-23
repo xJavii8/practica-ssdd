@@ -125,4 +125,59 @@ public class SQLUserDAO implements IUserDAO
             return Optional.empty();
         }
     }
+
+    @Override
+    public boolean deleteUser(String id) {
+        // TODO Auto-generated method stub
+        Optional<User> user = getUserById(id);
+        if (user.isPresent()){
+            try {
+                PreparedStatement stm = conn.get().prepareStatement("DELETE from users WHERE id = ?");
+                stm.setString(1, id);
+                int result = stm.executeUpdate();
+                if (result == 1 ){
+                    return true;
+                }
+    
+             
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
+        }
+        return false;
+    }
+
+    @Override
+    public Optional<User> modifyUser(User user) {
+        // TODO Auto-generated method stub
+        Optional<User> user2 = getUserById(user.getId());
+        if (!user2.get().getEmail().equals(user.getEmail())){
+            Optional<User> userOther = getUserByEmail(user.getEmail());
+            if(userOther.isPresent()){
+                return Optional.empty();
+            }
+        }
+        try {
+            PreparedStatement stm = conn.get().prepareStatement("UPDATE users SET email = ?, password_hash = ?, name = ?, token = ?, visits = ? WHERE id = ?");
+            stm.setString(1, user.getEmail());
+            stm.setString(2, user.getPassword_hash());
+            stm.setString(3, user.getName());
+            stm.setString(4, user.getToken());
+            stm.setInt(5, user.getVisits());
+            stm.setString(6, user.getId());
+            int result = stm.executeUpdate();
+            if(result!=0){
+                return Optional.of(user);
+            }
+         
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return Optional.empty();
+
+    }
+
 }

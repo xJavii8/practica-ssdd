@@ -13,6 +13,7 @@ services:
 
   ssdd-llamachat:
     image: dsevilla/ssdd-llamachat:1.0
+    hostname: llamachat
     ports:
       - 5020:5020
 

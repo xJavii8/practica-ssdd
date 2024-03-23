@@ -8,8 +8,8 @@ package es.um.sisdist.backend.grpc;
 service GrpcService
 {
     rpc Ping(PingRequest) returns (PingResponse);
-}
 
+}
 message PingRequest
 {
 	int32 v = 1;
