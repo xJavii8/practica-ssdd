@@ -6,43 +6,33 @@
 {% endblock %}
 
 {% block content %}
-<div class="form-signup">
-    <h3 class="title">Registro</h3>
-    <div class="box">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="notification is-danger">
-                    {{ messages[0] }}<br> Go to <a href="{{ url_for('auth.login') }}">login page</a>.
-                </div>
-            {% endif %}
-        {% endwith %}
+<div class="form-signup form-container">
+    <form method="POST" action="/signup">
+        {{ form.hidden_tag() }}
+        <h3 class="h3 mb-3 fw-normal">Registro</h3>
 
-        <form method="POST" action="/signup">
-            {{ form.hidden_tag() }}
+        <div class="form-floating">
+            <input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+            <label for="floatingInput">Correo electrónico</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" name="name" class="form-control" id="floatingInput" placeholder="Nombre">
+            <label for="floatingInput">Nombre</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Contraseña">
+            <label for="floatingPassword">Contraseña</label>
+        </div>
 
-            <div class="form-floating">
-                <input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-                <label for="floatingInput">Correo electrónico</label>
-            </div>
-            <div class="form-floating">
-                <input type="text" name="name" class="form-control" id="floatingInput" placeholder="Nombre">
-                <label for="floatingInput">Nombre</label>
-            </div>
-            <div class="form-floating">
-                <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Contraseña">
-                <label for="floatingPassword">Contraseña</label>
-            </div>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Registrar</button>
+    </form>
 
-              <button class="w-100 btn btn-lg btn-primary" type="submit">Registrar</button>
-        </form>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
-    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
 </div>
 {% endblock %}

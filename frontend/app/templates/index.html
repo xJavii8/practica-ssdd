@@ -15,13 +15,14 @@
         Inicia sesión para crear sesión de prompts
     {% endif %}
 </p>
-
-    <form method="POST">
-        <div class="textarea-wrapper">
-            <textarea id="prompt" name="textarea" class="form-control" placeholder="Mensaje..." oninput="ajustarAltura(this)"></textarea>
-            <button id="send" class="btn btn-primary btn-inside-textarea" type="submit">Enviar</button>
-        </div>
-        <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
-    </form>
+    <div class="form-container col-md-10 mx-auto">
+        <form method="POST">
+            <div class="textarea-wrapper">
+                <textarea id="prompt" name="textarea" class="form-control" placeholder="Mensaje..." oninput="ajustarAltura(this)"></textarea>
+                <button id="send" class="btn btn-primary btn-inside-textarea" type="submit">Enviar</button>
+            </div>
+            <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+        </form>
+    </div>
 
 {% endblock %}

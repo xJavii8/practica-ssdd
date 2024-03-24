@@ -11,6 +11,18 @@
 
     <link rel="shortcut icon" href="{{ url_for('serve_static', path='favicon.ico') }}">
     <style>
+      body {
+        background-color: #E6E6FA;
+      }
+
+      .form-container {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-top: 30px;
+      }
+
       .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -35,26 +47,30 @@
 <body class="d-flex flex-column h-100">
 <header>
   <!-- Fixed navbar -->
-  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <nav class="navbar navbar-expand-md navbar-light fixed-top" style="background-color: #9370DB">
     <div class="container-fluid">
-      <a class="navbar-brand" href="{{ url_for('index') }}">LlamaChat</a>
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <img src="{{ url_for('serve_static', path='mainIcon.webp') }}" width="30" height="30" class="d-inline-block align-top" alt="">
+        LlamaChat
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Inicio</a>
+            <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">Inicio</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Enlace 1</a>
           </li>
+        </ul>
 
+        <ul class="navbar-nav ms-auto mb-2 mb-md-0">
           {% if current_user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('profile') }}">Perfil</a>
           </li>
-
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('logout') }}">Cerrar sesión</a>
           </li>
@@ -67,7 +83,6 @@
             <a class="nav-link" href="{{ url_for('register') }}">Registro</a>
           </li>
           {% endif %}
-
         </ul>
         <!-- <form class="d-flex"> -->
         <!--   <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"> -->
@@ -89,9 +104,9 @@
   </div>
 </main>
 
-<footer class="footer mt-auto py-3 bg-light">
+<footer class="footer mt-auto py-3 bg-dark-subtle">
   <div class="container">
-    <span class="text-muted">Place sticky footer content here.</span>
+    <span class="text-muted">LlamaChat - Sistemas Distribuidos</span>
   </div>
 </footer>
 

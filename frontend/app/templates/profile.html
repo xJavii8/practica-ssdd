@@ -1,11 +1,17 @@
 {% extends "base.html" %}
 
+{% block custom_style %}
+ <!-- Custom styles for this template -->
+    <link href="/static/profile.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <h1 class="title">
     Bienvenido, {{current_user.name}}
 </h1>
 
-<div class="form-container">
+<div class="form-container col-md-6 mx-auto">
+    <h3 class="section-title">Información personal</h2>
     <form action="/profile" method="POST">
         {{ form.hidden_tag() }}
 
@@ -16,12 +22,12 @@
         
         <div class="form-floating mb-3">
             <input type="email" id="actualEmail" name="actualEmail" class="form-control" value="{{ current_user.email }}" readonly>
-            <label for="actualEmail">Email actual</label>
+            <label for="actualEmail">Correo electrónico actual</label>
         </div>
         
         <div class="form-floating mb-3">
             <input type="email" id="newMail" name="newMail" class="form-control">
-            <label for="newMail">Nuevo email</label>
+            <label for="newMail">Nuevo correo electrónico</label>
         </div>
         
         <div class="form-floating mb-3">
@@ -31,26 +37,25 @@
         
         <button type="submit" id="updateButton" class="w-100 btn btn-lg btn-primary" disabled>Actualizar información</button>
     </form>
+</div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+    <div class="alert-container col-md-6 mx-auto">
         {% for category, message in messages %}
         <div class="alert alert-{{ category }}">{{ message }}</div>
         {% endfor %}
-    {% endif %}
-    {% endwith %}
+    </div>
+{% endif %}
+{% endwith %}
 
-</div>
-
-<div class="form-container mt-4">
+<div class="form-container mt-4 col-md-6 mx-auto">
     <form id="deleteForm" action="/deleteUser" method="POST">
         {{ form.hidden_tag() }}
         <button type="submit" id="deleteButton" data-confirm="false" class="w-100 btn btn-lg btn-warning">Eliminar cuenta</button>
     </form>
 </div>
 
-
 <script src="{{ url_for('static', filename='scripts/profile.js') }}"></script>
-
 
 {% endblock %}
