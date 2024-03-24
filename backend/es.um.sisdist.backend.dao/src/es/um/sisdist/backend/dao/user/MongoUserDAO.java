@@ -118,12 +118,6 @@ public class MongoUserDAO implements IUserDAO {
         boolean error = false;
         Optional<User> userExists = getUserByEmail(emailActual);
 
-        FindIterable<User> users = collection.get().find();
-
-        for (User u : users) {
-            System.out.println(u.toString());
-        }
-
         if (userExists.isPresent()) {
             User u = userExists.get();
 
