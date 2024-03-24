@@ -102,14 +102,15 @@ public class MongoUserDAO implements IUserDAO {
 
     @Override
     public boolean deleteUser(String id) {
-        // TODO Auto-generated method stub
         Optional<User> e = getUserById(id);
+
         if (e.isPresent()) {
-            DeleteResult result = collection.get().deleteOne((Bson) e.get());
+            DeleteResult result = collection.get().deleteOne(Filters.eq("id", id));
             if (result.getDeletedCount() == 1) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -137,6 +138,7 @@ public class MongoUserDAO implements IUserDAO {
                 }
 
                 if (!emailNuevo.isEmpty()) {
+                    updates.add(Updates.set("id", UserUtils.md5pass(emailNuevo)));
                     updates.add(Updates.set("email", emailNuevo));
                 }
 

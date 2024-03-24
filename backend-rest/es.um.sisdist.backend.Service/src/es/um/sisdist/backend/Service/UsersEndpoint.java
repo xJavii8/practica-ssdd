@@ -19,15 +19,13 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 @Path("/u")
-public class UsersEndpoint
-{
+public class UsersEndpoint {
     private AppLogicImpl impl = AppLogicImpl.getInstance();
 
     @GET
     @Path("/{username}")
     @Produces(MediaType.APPLICATION_JSON)
-    public UserDTO getUserInfo(@PathParam("username") String username)
-    {
+    public UserDTO getUserInfo(@PathParam("username") String username) {
         return UserDTOUtils.toDTO(impl.getUserByEmail(username).orElse(null));
     }
 
@@ -35,13 +33,14 @@ public class UsersEndpoint
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response registerUser(UserDTO uo){
+    public Response registerUser(UserDTO uo) {
         Optional<User> u = impl.createUser(uo.getEmail(), uo.getName(), uo.getPassword());
-        if (u.isPresent()){
-            //Mejor retonar objeto completo que solo el id para no tener llamadas de más a la API.
+        if (u.isPresent()) {
+            // Mejor retonar objeto completo que solo el id para no tener llamadas de más a
+            // la API.
             return Response.ok(UserDTOUtils.toDTO(u.get())).build();
-        }else{
-            //Error 409 si email ya existe.
+        } else {
+            // Error 409 si email ya existe.
             return Response.status(Status.CONFLICT).build();
         }
     }
@@ -50,10 +49,24 @@ public class UsersEndpoint
     @Path("/changeInfo")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response changeInfoUser(ChangeUserInfoDTO cuio){
-        Optional<User> u = impl.modifyUser(cuio.getActualEmail(), cuio.getNewMail(), cuio.getName(), cuio.getPassword());
+    public Response changeInfoUser(ChangeUserInfoDTO cuio) {
+        Optional<User> u = impl.modifyUser(cuio.getActualEmail(), cuio.getNewMail(), cuio.getName(),
+                cuio.getPassword());
         if (u.isPresent()) {
             return Response.ok(UserDTOUtils.toDTO(u.get())).build();
+        } else {
+            return Response.status(Status.NO_CONTENT).build();
+        }
+    }
+
+    @POST
+    @Path("/deleteUser/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteUser(@PathParam("id") String id) {
+        boolean deleted = impl.deleteUser(id);
+        if (deleted) {
+            return Response.status(Status.OK).build();
         } else {
             return Response.status(Status.NO_CONTENT).build();
         }

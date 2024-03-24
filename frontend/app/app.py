@@ -10,40 +10,39 @@ from models import users, User
 # Login
 from forms import LoginForm, RegistrationForm, ChangeUserForm
 
-# Workaround: Login
-import hashlib
-
 # Configuración del logger
 logging.basicConfig(format="%(filename)s:%(lineno)d - %(levelname)s - %(message)s")
 logging.getLogger().setLevel(logging.INFO)
 
 app = Flask(__name__, static_url_path='')
 login_manager = LoginManager()
-login_manager.init_app(app) # Para mantener la sesión
+login_manager.init_app(app)  # Para mantener la sesión
 
 # Configurar el secret_key. OJO, no debe ir en un servidor git público.
 # Python ofrece varias formas de almacenar esto de forma segura, que
 # no cubriremos aquí.
 app.config['SECRET_KEY'] = 'qH1vprMjavek52cv7Lmfe1FoCexrrV8egFnB21jHhkuOHm8hJUe1hwn7pKEZQ1fioUzDb3sWcNK1pJVVIhyrgvFiIrceXpKJBFIn_i9-LTLBCc4cqaI3gjJJHU6kxuT8bnC7Ng'
 
+
 @app.route('/static/<path:path>')
 def serve_static(path):
     return send_from_directory('static', path)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == "POST":
         logging.info('REQUEST DATA: ' + request.form['textarea'])
-        # Falta la lógica para mandar al REST 
+        # Falta la lógica para mandar al REST
         pass
     return render_template('index.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     else:
-        error = None
         form = LoginForm(None if request.method != 'POST' else request.form)
         if request.method == "POST" and form.validate():
             loginData = {"email": form.email.data, "password": form.password.data}
@@ -55,15 +54,15 @@ def login():
                 login_user(user, remember=form.remember_me.data)
                 return redirect(url_for('index'))
             else:
-                error = "Credenciales incorrectas. Vuelve a intentarlo"
-        return render_template('login.html', form=form,  error=error)
-    
+                flash('Credenciales incorrectas. Vuelve a intentarlo.', 'danger')
+        return render_template('login.html', form=form)
+
+
 @app.route('/signup', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     else:
-        error = None
         form = RegistrationForm(None if request.method != 'POST' else request.form)
         if request.method == "POST" and form.validate():
             registerData = {"email": form.email.data, "name": form.name.data, "password": form.password.data}
@@ -75,16 +74,15 @@ def register():
                 login_user(user)
                 return redirect(url_for('index'))
             else:
-                error = "Este usuario ya existe."
-        return render_template('signup.html', form=form, error=error)
+                flash('Este usuario ya existe.', 'danger')
+        return render_template('signup.html', form=form)
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    error = None
     form = ChangeUserForm(None if request.method != 'POST' else request.form)
     if request.method == "POST" and form.validate():
-        logging.info(str(request.form))
         changeUserInfoData = {"actualEmail": form.actualEmail.data, "newMail": form.newMail.data, "name": form.name.data, "password": form.newPassword.data}
         changeUserInfoPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/changeInfo', json=changeUserInfoData)
         if changeUserInfoPOST.status_code == 200:
@@ -97,8 +95,23 @@ def profile():
             flash('Credenciales actualizadas correctamente.', 'success')
             return redirect(url_for('profile'))
         else:
-            error = "Este nuevo email ya existe, o has puesto la misma contraseña que tenías. Por favor, inténtalo de nuevo."
-    return render_template('profile.html', form=form, error=error)
+            flash('Ha ocurrido un error. Inténtalo de nuevo', 'danger')
+    return render_template('profile.html', form=form)
+
+
+@app.route('/deleteUser', methods=['POST'])
+@login_required
+def deleteUser():
+    userID = str(format(current_user.id, '032x'))
+    deleteUserPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/deleteUser/{userID}')
+    if deleteUserPOST.status_code == 200:
+        users.remove(current_user)
+        logout_user()
+        return redirect(url_for('index'))
+    else:
+        flash('Ha ocurrido un error. Inténtalo de nuevo', 'danger')
+        return redirect(url_for('profile'))
+
 
 @app.route('/logout')
 @login_required
@@ -106,12 +119,14 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+
 @login_manager.user_loader
 def load_user(user_id):
     for user in users:
         if user.id == int(user_id):
             return user
     return None
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5010)))

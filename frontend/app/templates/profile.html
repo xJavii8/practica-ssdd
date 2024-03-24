@@ -21,20 +21,16 @@
         
         <div class="form-floating mb-3">
             <input type="email" id="newMail" name="newMail" class="form-control">
-            <label for="newMail">Email nuevo (opcional)</label>
+            <label for="newMail">Nuevo email</label>
         </div>
         
         <div class="form-floating mb-3">
-            <input type="password" id="newPassword" name="newPassword" class="form-control" required>
-            <label for="newPassword">Contraseña nueva (obligatorio)</label>
+            <input type="password" id="newPassword" name="newPassword" class="form-control">
+            <label for="newPassword">Nueva contraseña</label>
         </div>
         
-        <button type="submit" class="w-100 btn btn-lg btn-primary">Actualizar información</button>
+        <button type="submit" id="updateButton" class="w-100 btn btn-lg btn-primary" disabled>Actualizar información</button>
     </form>
-
-    {% if error %}
-        <p class="error"><strong>Error:</strong> {{ error }}</p>
-    {% endif %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -45,6 +41,16 @@
     {% endwith %}
 
 </div>
+
+<div class="form-container mt-4">
+    <form id="deleteForm" action="/deleteUser" method="POST">
+        {{ form.hidden_tag() }}
+        <button type="submit" id="deleteButton" data-confirm="false" class="w-100 btn btn-lg btn-warning">Eliminar cuenta</button>
+    </form>
+</div>
+
+
+<script src="{{ url_for('static', filename='scripts/profile.js') }}"></script>
 
 
 {% endblock %}

@@ -36,9 +36,13 @@
               <button class="w-100 btn btn-lg btn-primary" type="submit">Registrar</button>
         </form>
 
-        {% if error %}
-            <p class="error"><strong>Error:</strong> {{ error }}</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
         {% endif %}
+        {% endwith %}
     </div>
 </div>
 {% endblock %}
