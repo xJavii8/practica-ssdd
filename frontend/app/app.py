@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, url_for, request, redirect
+from flask import Flask, render_template, send_from_directory, url_for, request, redirect, flash
 from flask_login import LoginManager, login_manager, current_user, login_user, login_required, logout_user
 import requests
 import os
@@ -8,7 +8,7 @@ import logging
 from models import users, User
 
 # Login
-from forms import LoginForm, RegistrationForm
+from forms import LoginForm, RegistrationForm, ChangeUserForm
 
 # Workaround: Login
 import hashlib
@@ -47,7 +47,7 @@ def login():
         form = LoginForm(None if request.method != 'POST' else request.form)
         if request.method == "POST" and form.validate():
             loginData = {"email": form.email.data, "password": form.password.data}
-            loginPOST = requests.post('http://backend-rest:8080/Service/checkLogin', json=loginData)
+            loginPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/checkLogin', json=loginData)
             if loginPOST.status_code == 200:
                 json = loginPOST.json()
                 user = User(int(json['id'], 16), json['name'], json['email'], form.password.data.encode('utf-8'))
@@ -67,7 +67,7 @@ def register():
         form = RegistrationForm(None if request.method != 'POST' else request.form)
         if request.method == "POST" and form.validate():
             registerData = {"email": form.email.data, "name": form.name.data, "password": form.password.data}
-            registerPOST = requests.post('http://backend-rest:8080/Service/register', json=registerData)
+            registerPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/register', json=registerData)
             if registerPOST.status_code == 200:
                 json = registerPOST.json()
                 user = User(int(json['id'], 16), json['name'], json['email'], form.password.data.encode('utf-8'))
@@ -78,10 +78,27 @@ def register():
                 error = "Este usuario ya existe."
         return render_template('signup.html', form=form, error=error)
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    return render_template('profile.html')
+    error = None
+    form = ChangeUserForm(None if request.method != 'POST' else request.form)
+    if request.method == "POST" and form.validate():
+        logging.info(str(request.form))
+        changeUserInfoData = {"actualEmail": form.actualEmail.data, "newMail": form.newMail.data, "name": form.name.data, "password": form.newPassword.data}
+        changeUserInfoPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/changeInfo', json=changeUserInfoData)
+        if changeUserInfoPOST.status_code == 200:
+            json = changeUserInfoPOST.json()
+            users.remove(current_user)
+            logout_user()
+            user = User(int(json['id'], 16), json['name'], json['email'], form.newPassword.data.encode('utf-8'))
+            users.append(user)
+            login_user(user)
+            flash('Credenciales actualizadas correctamente.', 'success')
+            return redirect(url_for('profile'))
+        else:
+            error = "Este nuevo email ya existe, o has puesto la misma contraseña que tenías. Por favor, inténtalo de nuevo."
+    return render_template('profile.html', form=form, error=error)
 
 @app.route('/logout')
 @login_required

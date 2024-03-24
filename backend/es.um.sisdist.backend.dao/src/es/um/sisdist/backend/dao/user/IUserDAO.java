@@ -15,5 +15,5 @@ public interface IUserDAO
 
     public boolean deleteUser(String id);
     
-    public Optional<User> modifyUser(User user);
+    public Optional<User> modifyUser(String emailActual, String emailNuevo, String name, String passNueva);
 }

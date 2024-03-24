@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import es.um.sisdist.backend.Service.impl.AppLogicImpl;
 import es.um.sisdist.backend.dao.models.User;
+import es.um.sisdist.models.ChangeUserInfoDTO;
 import es.um.sisdist.models.UserDTO;
 import es.um.sisdist.models.UserDTOUtils;
 import jakarta.ws.rs.Consumes;
@@ -42,6 +43,19 @@ public class UsersEndpoint
         }else{
             //Error 409 si email ya existe.
             return Response.status(Status.CONFLICT).build();
+        }
+    }
+
+    @POST
+    @Path("/changeInfo")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response changeInfoUser(ChangeUserInfoDTO cuio){
+        Optional<User> u = impl.modifyUser(cuio.getActualEmail(), cuio.getNewMail(), cuio.getName(), cuio.getPassword());
+        if (u.isPresent()) {
+            return Response.ok(UserDTOUtils.toDTO(u.get())).build();
+        } else {
+            return Response.status(Status.NO_CONTENT).build();
         }
     }
 }

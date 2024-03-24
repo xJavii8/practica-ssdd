@@ -4,4 +4,47 @@
 <h1 class="title">
     Bienvenido, {{current_user.name}}
 </h1>
+
+<div class="form-container">
+    <form action="/profile" method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="form-floating mb-3">
+            <input type="text" id="name" name="name" class="form-control" value="{{ current_user.name }}" required minlength="2" maxlength="20">
+            <label for="name">Nombre</label>
+        </div>
+        
+        <div class="form-floating mb-3">
+            <input type="email" id="actualEmail" name="actualEmail" class="form-control" value="{{ current_user.email }}" readonly>
+            <label for="actualEmail">Email actual</label>
+        </div>
+        
+        <div class="form-floating mb-3">
+            <input type="email" id="newMail" name="newMail" class="form-control">
+            <label for="newMail">Email nuevo (opcional)</label>
+        </div>
+        
+        <div class="form-floating mb-3">
+            <input type="password" id="newPassword" name="newPassword" class="form-control" required>
+            <label for="newPassword">Contraseña nueva (obligatorio)</label>
+        </div>
+        
+        <button type="submit" class="w-100 btn btn-lg btn-primary">Actualizar información</button>
+    </form>
+
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{ error }}</p>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+</div>
+
+
 {% endblock %}
