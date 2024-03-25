@@ -5,24 +5,35 @@
 {% endblock %}
 
 {% block content %}
-<h1 class="mt-5">
-    LlamaChat
+<div class="text-center mt-5 fw-bold">
+<h1>
+    <img src="{{ url_for('static', filename='mainIcon.webp') }}" alt="LlamaChat Logo" style="height:100px;">LlamaChat
 </h1>
-<p class="lead">
+<div class="form-container col-md-8 mx-auto lead">
     {% if current_user.is_authenticated %}
-        Bienvenido.
-    {% else %}
-        Inicia sesión para crear sesión de prompts
-    {% endif %}
-</p>
-    <div class="form-container col-md-10 mx-auto">
+        Bienvenido, <strong>{{current_user.name}}</strong>. Para crear una conversación, indica cómo quieres que se llame:
+
         <form method="POST">
-            <div class="textarea-wrapper">
-                <textarea id="prompt" name="textarea" class="form-control" placeholder="Mensaje..." oninput="ajustarAltura(this)"></textarea>
-                <button id="send" class="btn btn-primary btn-inside-textarea" type="submit">Enviar</button>
+            <div class="input-group mb-3 convName mx-auto">
+                <input name="convName" type="text" class="form-control" placeholder="Nombre de la conversación" aria-label="Nombre de la conversación" aria-describedby="button-addon2" maxlength="100">
+                <button class="btn btn-outline-primary" type="submit" id="button-addon2">Crear</button>
             </div>
-            <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
         </form>
-    </div>
+
+    {% else %}
+        Bienvenido. Para iniciar una conversación, <a href="/login">inicia sesión</a> o <a href="/signup">regístrate</a>.
+    {% endif %}
+</div>
+</div>
+
+<div class="form-container col-md-10 mx-auto">
+    <form method="POST">
+        <div class="textarea-wrapper">
+            <textarea id="prompt" name="textarea" class="form-control" placeholder="Mensaje..." oninput="ajustarAltura(this)"></textarea>
+            <button id="send" class="btn btn-primary btn-inside-textarea" type="submit">Enviar</button>
+        </div>
+        <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+    </form>
+</div>
 
 {% endblock %}

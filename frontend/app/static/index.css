@@ -23,3 +23,8 @@ body {
   bottom: 10px; /* Distancia desde el fondo */
   z-index: 2;
 }
+
+.convName {
+  margin-top: 1rem;
+  max-width: 330px;
+}

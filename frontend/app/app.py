@@ -32,7 +32,7 @@ def serve_static(path):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == "POST":
-        logging.info('REQUEST DATA: ' + request.form['textarea'])
+        logging.info('REQUEST DATA: ' + request.form['convName'])
         # Falta la lógica para mandar al REST
         pass
     return render_template('index.html')
@@ -103,7 +103,7 @@ def profile():
 @login_required
 def deleteUser():
     userID = str(format(current_user.id, '032x'))
-    deleteUserPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/deleteUser/{userID}')
+    deleteUserPOST = requests.delete(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/deleteUser/{userID}')
     if deleteUserPOST.status_code == 200:
         users.remove(current_user)
         logout_user()
