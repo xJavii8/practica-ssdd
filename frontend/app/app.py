@@ -55,6 +55,8 @@ def login():
                 return redirect(url_for('index'))
             else:
                 flash('Credenciales incorrectas. Vuelve a intentarlo.', 'danger')
+        elif request.method == "POST" and not form.validate():
+            flash('Por favor, revisa tus credenciales.', 'danger')
         return render_template('login.html', form=form)
 
 
@@ -75,6 +77,8 @@ def register():
                 return redirect(url_for('index'))
             else:
                 flash('Este usuario ya existe.', 'danger')
+        elif request.method == "POST" and not form.validate():
+            flash('Por favor, revisa tus credenciales.', 'danger')
         return render_template('signup.html', form=form)
 
 
