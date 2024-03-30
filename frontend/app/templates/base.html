@@ -59,7 +59,7 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">Inicio</a>
+            <a class="nav-link {{ 'active' if active_page == 'index' else '' }}" aria-current="{{ 'page' if active_page == 'index' else 'false' }}" href="{{ url_for('index') }}">Inicio</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Enlace 1</a>
@@ -69,18 +69,17 @@
         <ul class="navbar-nav ms-auto mb-2 mb-md-0">
           {% if current_user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('profile') }}">Perfil</a>
+            <a class="nav-link {{ 'active' if active_page == 'profile' else '' }}" aria-current="{{ 'page' if active_page == 'profile' else 'false' }}" href="{{ url_for('profile') }}">Perfil</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}">Cerrar sesión</a>
+            <a class="nav-link {{ 'active' if active_page == 'logout' else '' }}" aria-current="{{ 'page' if active_page == 'logout' else 'false' }}" href="{{ url_for('logout') }}">Cerrar sesión</a>
           </li>
           {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('login') }}">Iniciar sesión</a>
+            <a class="nav-link {{ 'active' if active_page == 'login' else '' }}" aria-current="{{ 'page' if active_page == 'login' else 'false' }}" href="{{ url_for('login') }}">Iniciar sesión</a>
           </li>
-          
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('register') }}">Registro</a>
+            <a class="nav-link {{ 'active' if active_page == 'register' else '' }}" aria-current="{{ 'page' if active_page == 'register' else 'false' }}" href="{{ url_for('register') }}">Registro</a>
           </li>
           {% endif %}
         </ul>

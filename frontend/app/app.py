@@ -35,7 +35,7 @@ def index():
         logging.info('REQUEST DATA: ' + request.form['convName'])
         # Falta la lógica para mandar al REST
         pass
-    return render_template('index.html')
+    return render_template('index.html', active_page='index')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -57,7 +57,7 @@ def login():
                 flash('Credenciales incorrectas. Vuelve a intentarlo.', 'danger')
         elif request.method == "POST" and not form.validate():
             flash('Por favor, revisa tus credenciales.', 'danger')
-        return render_template('login.html', form=form)
+        return render_template('login.html', form=form, active_page='login')
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -79,7 +79,7 @@ def register():
                 flash('Este usuario ya existe.', 'danger')
         elif request.method == "POST" and not form.validate():
             flash('Por favor, revisa tus credenciales.', 'danger')
-        return render_template('signup.html', form=form)
+        return render_template('signup.html', form=form, active_page='register')
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -100,7 +100,7 @@ def profile():
             return redirect(url_for('profile'))
         else:
             flash('Ha ocurrido un error. Inténtalo de nuevo', 'danger')
-    return render_template('profile.html', form=form)
+    return render_template('profile.html', form=form, active_page='profile')
 
 
 @app.route('/deleteUser', methods=['POST'])
