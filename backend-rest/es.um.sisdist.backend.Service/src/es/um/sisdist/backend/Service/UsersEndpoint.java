@@ -4,6 +4,7 @@ package es.um.sisdist.backend.Service;
 import java.util.Optional;
 
 import es.um.sisdist.backend.Service.impl.AppLogicImpl;
+import es.um.sisdist.backend.dao.models.Conversacion;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.models.ChangeUserInfoDTO;
 import es.um.sisdist.models.UserDTO;
@@ -72,4 +73,18 @@ public class UsersEndpoint {
             return Response.status(Status.NO_CONTENT).build();
         }
     }
+    @GET
+    @Path("/testConversacion")
+    public Response testConversacion(){
+        Optional<Conversacion> conv = impl.creatConversacion();
+        if (!conv.isPresent()){
+            return Response.status(Status.NO_CONTENT).build();
+        }
+        Optional<Conversacion> conv2 = impl.addDialogo(conv.get().getId(), "Hola, esto es una prueba", System.currentTimeMillis());
+        if(conv2.get().getDialogos().isEmpty()){
+            return Response.status(Status.NO_CONTENT).build();
+        }
+        return Response.status(Status.OK).build();
+    }
+
 }

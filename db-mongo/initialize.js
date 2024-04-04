@@ -13,7 +13,21 @@ db.users.createIndex(
 	{
 		unique: true
 	})
+db.conversaciones.createIndex(
+	{
+		"id":1
+	},{
+		unique: true
+	}
+)
 
+db.dialogos.createIndex(
+	{
+		"id": 1
+	}, {
+		unique: true
+	}
+)
 
 db.users.insertOne({id: "dsevilla", 
 	email: "dsevilla@um.es",

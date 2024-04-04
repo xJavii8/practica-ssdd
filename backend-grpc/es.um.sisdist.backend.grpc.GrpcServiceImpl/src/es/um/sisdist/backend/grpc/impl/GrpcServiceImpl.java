@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
@@ -14,6 +15,10 @@ import es.um.sisdist.backend.grpc.PingRequest;
 import es.um.sisdist.backend.grpc.PingResponse;
 import es.um.sisdist.backend.grpc.POSTRequest;
 import es.um.sisdist.backend.grpc.POSTResponse;
+import es.um.sisdist.backend.dao.models.Conversacion;
+import es.um.sisdist.backend.dao.models.Dialogo;
+import es.um.sisdist.backend.dao.user.MongoConversacionDAO;
+import es.um.sisdist.backend.dao.user.MongoDialogoDAO;
 import es.um.sisdist.backend.grpc.GETRequest;
 import es.um.sisdist.backend.grpc.GETResponse;
 import io.grpc.stub.StreamObserver;
@@ -21,6 +26,8 @@ import io.grpc.stub.StreamObserver;
 class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase 
 {
 	private Logger logger;
+	MongoDialogoDAO dialogoDAO = new MongoDialogoDAO();
+	MongoConversacionDAO conversacionDAO = new MongoConversacionDAO();
 	
     public GrpcServiceImpl(Logger logger) 
     {
@@ -91,8 +98,10 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 	{
 		try {
 			StringBuffer response = new StringBuffer();
-
-
+			Conversacion conv = conversacionDAO.getConversacionById(request.getIdConversation()).get();
+			String idDialogo = request.getAnswerURL().split("/")[2];
+			logger.info(idDialogo);
+			//conversacionDAO.modifyConversacion(conv.getId(), Conversacion.BUSY);
 			while(true) {
 
 				URL url = new URL("http://llamachat:5020" + request.getAnswerURL());
@@ -109,7 +118,9 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 						response.append(inputLine);
 					}
 					in.close();
-		
+					Optional<Dialogo> dialogo = dialogoDAO.modifyDialogo(idDialogo, "", Optional.empty(), response.toString());
+					conversacionDAO.addDialogo(conv.getId(), idDialogo);
+					//conversacionDAO.modifyConversacion(conv.getId(), Conversacion.READY);
 					System.out.println(response.toString());
 					break;
 				} else {

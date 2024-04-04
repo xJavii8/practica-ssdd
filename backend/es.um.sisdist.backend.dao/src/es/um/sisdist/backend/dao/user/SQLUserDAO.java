@@ -8,10 +8,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import es.um.sisdist.backend.dao.models.Dialogo;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.utils.Lazy;
@@ -150,10 +152,29 @@ public class SQLUserDAO implements IUserDAO
     }
 
     @Override
-    public Optional<User> modifyUser(String emailActual, String emailNuevo, String name, String passNueva) {
+    public Optional<User> modifyUser(String id,String emailActual, String emailNuevo, String name, String passNueva) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method");
 
     }
+
+    @Override
+    public Optional<User> addConversation(String idUser, String idConversation) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addConversation'");
+    }
+    
+    @Override
+    public Optional<List<Dialogo>> getAllDialogosOfUser(String idUser) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllDialogosOfUser'");
+    }
+
+    @Override
+    public Optional<Dialogo> getDialogoOfUser(String idUser, String idDialogo) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
+    }
+  
 
 }

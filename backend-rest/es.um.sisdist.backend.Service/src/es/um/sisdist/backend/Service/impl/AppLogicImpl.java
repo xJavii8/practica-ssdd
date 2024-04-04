@@ -6,12 +6,14 @@ package es.um.sisdist.backend.Service.impl;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.glassfish.jersey.internal.util.Tokenizer;
 import org.glassfish.jersey.message.internal.Token;
 
 import com.google.protobuf.Option;
+import java.util.Date;
 
 import es.um.sisdist.backend.grpc.GETRequest;
 import es.um.sisdist.backend.grpc.GETResponse;
@@ -23,9 +25,13 @@ import es.um.sisdist.models.UserDTO;
 import es.um.sisdist.models.UserDTOUtils;
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
 import es.um.sisdist.backend.dao.IDAOFactory;
+import es.um.sisdist.backend.dao.models.Conversacion;
+import es.um.sisdist.backend.dao.models.Dialogo;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.user.IUserDAO;
+import es.um.sisdist.backend.dao.user.MongoConversacionDAO;
+import es.um.sisdist.backend.dao.user.MongoDialogoDAO;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -37,6 +43,8 @@ import io.grpc.StatusRuntimeException;
 public class AppLogicImpl {
     IDAOFactory daoFactory;
     IUserDAO dao;
+    MongoDialogoDAO dialogoDAO = new MongoDialogoDAO();
+    MongoConversacionDAO conversacionDAO = new MongoConversacionDAO();
 
     private static final Logger logger = Logger.getLogger(AppLogicImpl.class.getName());
     private static final SecureRandom secureRandom = new SecureRandom(); // threadsafe
@@ -126,38 +134,44 @@ public class AppLogicImpl {
         return dao.deleteUser(id);
     }
 
-    public String testPOST() {
+    public Optional<Conversacion> creatConversacion(){
+        Optional<Conversacion> c = conversacionDAO.crearConversacion(UUID.randomUUID().toString(), Conversacion.READY);
+        return c;
+    }
+    
+    public Optional<Conversacion> addDialogo(String idConversacion, String prompt, long time) {
 
-        POSTRequest req1 = POSTRequest.newBuilder().setPrompt("Hola! Esto es un test").build();
+        POSTRequest req1 = POSTRequest.newBuilder().setPrompt(prompt).build();
         POSTResponse resp1;
 
         GETResponse resp2;
         String answer = "";
-
+        
         try {
             resp1 = blockingStub.promptPOST(req1);
 
             logger.info("RESPUESTA POST: " + resp1.getLocalization());
+            
+            Dialogo d = dialogoDAO.crearDialogo(resp1.getLocalization().split("/")[2], null, prompt, new Date(time)).get();
 
-            GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).build();
+            GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(idConversacion).build();
 
             resp2 = blockingStub.promptGET(req2);
 
             logger.info("RESPUESTA GET: " + resp2.getAnswerText());
-
-            answer = resp2.getAnswerText();
-
+            
         } catch (StatusRuntimeException e) {
-            return "";
+            return Optional.empty();
+            
         }
 
-        return answer;
+        return conversacionDAO.getConversacionById(idConversacion);
     }
 
     public Optional<User> modifyUser(String actualEmail, String newMail, String name, String password) {
         Optional<User> u = dao.getUserByEmail(actualEmail);
         if (u.isPresent()) {
-            return dao.modifyUser(actualEmail, newMail, name, password);
+            return dao.modifyUser(u.get().getId(),actualEmail, newMail, name, password);
         }
         return Optional.empty();
     }

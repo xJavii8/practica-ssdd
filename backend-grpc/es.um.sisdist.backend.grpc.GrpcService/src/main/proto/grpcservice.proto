@@ -10,6 +10,7 @@ service GrpcService
     rpc Ping(PingRequest) returns (PingResponse);
 	rpc promptPOST(POSTRequest) returns (POSTResponse);
 	rpc promptGET(GETRequest) returns (GETResponse);
+
 }
 
 message PingRequest
@@ -35,9 +36,10 @@ message POSTResponse
 message GETRequest
 {
 	string answerURL = 1;
+	string idConversation = 2;
 }
 
 message GETResponse
 {
-	string answerText = 1;
+	string answerText =1;
 }

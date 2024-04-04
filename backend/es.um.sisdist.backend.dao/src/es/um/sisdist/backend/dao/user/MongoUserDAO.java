@@ -37,6 +37,7 @@ import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
+import es.um.sisdist.backend.dao.models.Dialogo;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.utils.Lazy;
@@ -115,7 +116,7 @@ public class MongoUserDAO implements IUserDAO {
     }
 
     @Override
-    public Optional<User> modifyUser(String emailActual, String emailNuevo, String name, String passNueva) {
+    public Optional<User> modifyUser(String id, String emailActual, String emailNuevo, String name, String passNueva) {
         boolean error = false;
         Optional<User> userExists = getUserByEmail(emailActual);
 
@@ -156,4 +157,19 @@ public class MongoUserDAO implements IUserDAO {
         return Optional.empty();
     }
 
+    @Override
+    public Optional<User> addConversation(String idUser, String idConversation) {
+        throw new UnsupportedOperationException("Unimplemented method 'addConversation'");
+    }
+    @Override
+    public Optional<List<Dialogo>> getAllDialogosOfUser(String idUser) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllDialogosOfUser'");
+    }
+
+    @Override
+    public Optional<Dialogo> getDialogoOfUser(String idUser, String idDialogo) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
+    }
 }

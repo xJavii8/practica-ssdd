@@ -3,6 +3,9 @@
  */
 package es.um.sisdist.backend.dao.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 
 public class User
@@ -15,6 +18,8 @@ public class User
     private String token;
 
     private int visits;
+
+    private List<Conversacion> conversaciones;
 
     /**
      * @return the id
@@ -111,6 +116,20 @@ public class User
     {
         this.visits = visits;
     }
+        /**
+         * 
+         * @return the conversations
+         */
+    public List<Conversacion> getConversaciones() {
+        return conversaciones;
+    }
+    /**
+     * 
+     * @param conversaciones
+     */
+    public void setConversaciones(List<Conversacion> conversaciones) {
+        this.conversaciones = conversaciones;
+    }
 
     public User(String email, String password_hash, String name, String tOKEN, int visits)
     {
@@ -126,6 +145,7 @@ public class User
         this.name = name;
         token = tOKEN;
         this.visits = visits;
+        this.conversaciones = new ArrayList<Conversacion>();
     }
 
     @Override
