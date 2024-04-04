@@ -10,34 +10,48 @@
     Bienvenido, <strong>{{current_user.name}}</strong>
 </h1>
 
-<div class="form-container col-md-6 mx-auto">
-    <h3 class="section-title">Información personal</h2>
-    <form action="/profile" method="POST">
-        {{ form.hidden_tag() }}
+<div class="row">
+    <div class="col-md-3">
+        <div class="customContainer p-3">
+            <h3 class="text-center">Estadísticas</h3>
+            <p class="fw-bold">Visitas: placeholder</p>
+            <p class="fw-bold">Conversaciones: placeholder</p>
+            <p class="fw-bold">Llamadas al prompt: placeholder</p>
+        </div>
+    </div>
 
-        <div class="form-floating mb-3">
-            <input type="text" id="name" name="name" class="form-control" value="{{ current_user.name }}" required minlength="2" maxlength="20">
-            <label for="name">Nombre</label>
+    <div class="col-md-6">
+        <div class="customContainer p-3">
+            <h3 class="section-title">Información personal</h3>
+            <form action="/profile" method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="form-floating mb-3">
+                    <input type="text" id="name" name="name" class="form-control" value="{{ current_user.name }}" required minlength="2" maxlength="20">
+                    <label for="name">Nombre</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="email" id="actualEmail" name="actualEmail" class="form-control" value="{{ current_user.email }}" readonly>
+                    <label for="actualEmail">Correo electrónico actual</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="email" id="newMail" name="newMail" class="form-control">
+                    <label for="newMail">Nuevo correo electrónico</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="password" id="newPassword" name="newPassword" class="form-control">
+                    <label for="newPassword">Nueva contraseña</label>
+                </div>
+
+                <button type="submit" id="updateButton" class="w-100 btn btn-lg btn-primary" disabled>Actualizar información</button>
+            </form>
         </div>
-        
-        <div class="form-floating mb-3">
-            <input type="email" id="actualEmail" name="actualEmail" class="form-control" value="{{ current_user.email }}" readonly>
-            <label for="actualEmail">Correo electrónico actual</label>
-        </div>
-        
-        <div class="form-floating mb-3">
-            <input type="email" id="newMail" name="newMail" class="form-control">
-            <label for="newMail">Nuevo correo electrónico</label>
-        </div>
-        
-        <div class="form-floating mb-3">
-            <input type="password" id="newPassword" name="newPassword" class="form-control">
-            <label for="newPassword">Nueva contraseña</label>
-        </div>
-        
-        <button type="submit" id="updateButton" class="w-100 btn btn-lg btn-primary" disabled>Actualizar información</button>
-    </form>
+    </div>
 </div>
+
 
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
@@ -49,7 +63,7 @@
 {% endif %}
 {% endwith %}
 
-<div class="form-container mt-4 col-md-6 mx-auto">
+<div class="customContainer mt-4 col-md-6 mx-auto">
     <form id="deleteForm" action="/deleteUser" method="POST">
         {{ form.hidden_tag() }}
         <button type="submit" id="deleteButton" data-confirm="false" class="w-100 btn btn-lg btn-warning">Eliminar cuenta</button>
