@@ -13,7 +13,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import es.um.sisdist.backend.dao.models.Dialogo;
+import es.um.sisdist.backend.dao.models.Conversation;
+import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.utils.Lazy;
@@ -22,47 +23,41 @@ import es.um.sisdist.backend.dao.utils.Lazy;
  * @author dsevilla
  *
  */
-public class SQLUserDAO implements IUserDAO
-{
+public class SQLUserDAO implements IUserDAO {
     Supplier<Connection> conn;
 
-    public SQLUserDAO()
-    {
-    	conn = Lazy.lazily(() -> 
-    	{
-    		try
-    		{
-    			Class.forName("com.mysql.cj.jdbc.Driver").getConstructor().newInstance();
+    public SQLUserDAO() {
+        conn = Lazy.lazily(() -> {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver").getConstructor().newInstance();
 
-    			// Si el nombre del host se pasa por environment, se usa aquí.
-    			// Si no, se usa localhost. Esto permite configurarlo de forma
-    			// sencilla para cuando se ejecute en el contenedor, y a la vez
-    			// se pueden hacer pruebas locales
-    			String sqlServerName = Optional.ofNullable(System.getenv("SQL_SERVER")).orElse("localhost");
-    			String dbName = Optional.ofNullable(System.getenv("DB_NAME")).orElse("ssdd");
-    			return DriverManager.getConnection(
-                    "jdbc:mysql://" + sqlServerName + "/" + dbName + "?user=root&password=root");
-    		} catch (Exception e)
-    		{
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-            
-    			return null;
-    		}
-    	});
+                // Si el nombre del host se pasa por environment, se usa aquí.
+                // Si no, se usa localhost. Esto permite configurarlo de forma
+                // sencilla para cuando se ejecute en el contenedor, y a la vez
+                // se pueden hacer pruebas locales
+                String sqlServerName = Optional.ofNullable(System.getenv("SQL_SERVER")).orElse("localhost");
+                String dbName = Optional.ofNullable(System.getenv("DB_NAME")).orElse("ssdd");
+                return DriverManager.getConnection(
+                        "jdbc:mysql://" + sqlServerName + "/" + dbName + "?user=root&password=root");
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+
+                return null;
+            }
+        });
     }
 
     @Override
-    public Optional<User> getUserById(String id)
-    {
+    public Optional<User> getUserById(String id) {
         PreparedStatement stm;
-        try{
+        try {
             stm = conn.get().prepareStatement("SELECT * from users WHERE id = ?");
             stm.setString(1, id);
             ResultSet result = stm.executeQuery();
             if (result.next())
                 return createUser(result);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         // TODO Auto-generated method stub
@@ -70,18 +65,15 @@ public class SQLUserDAO implements IUserDAO
     }
 
     @Override
-    public Optional<User> getUserByEmail(String id)
-    {
+    public Optional<User> getUserByEmail(String id) {
         PreparedStatement stm;
-        try
-        {
+        try {
             stm = conn.get().prepareStatement("SELECT * from users WHERE email = ?");
             stm.setString(1, id);
             ResultSet result = stm.executeQuery();
             if (result.next())
                 return createUser(result);
-        } catch (SQLException e)
-        {
+        } catch (SQLException e) {
             // Fallthrough
         }
         return Optional.empty();
@@ -91,8 +83,9 @@ public class SQLUserDAO implements IUserDAO
     public Optional<User> crearUser(String email, String password, String name) {
         PreparedStatement stm;
         try {
-            //Prepare insert statement
-            stm = conn.get().prepareStatement("INSERT INTO users (id, email, password_hash, name, token, visits) VALUES (?,?,?,?,?,?);");
+            // Prepare insert statement
+            stm = conn.get().prepareStatement(
+                    "INSERT INTO users (id, email, password_hash, name, token, visits) VALUES (?,?,?,?,?,?);");
             String userID = UserUtils.md5pass(email);
             String token = UUID.randomUUID().toString();
             stm.setString(1, userID);
@@ -111,19 +104,16 @@ public class SQLUserDAO implements IUserDAO
         }
         return Optional.empty();
     }
-        
-    private Optional<User> createUser(ResultSet result)
-    {
-        try
-        {
+
+    private Optional<User> createUser(ResultSet result) {
+        try {
             return Optional.of(new User(result.getString(1), // id
                     result.getString(2), // email
                     result.getString(3), // pwhash
                     result.getString(4), // name
                     result.getString(5), // token
                     result.getInt(6))); // visits
-        } catch (SQLException e)
-        {
+        } catch (SQLException e) {
             return Optional.empty();
         }
     }
@@ -132,49 +122,47 @@ public class SQLUserDAO implements IUserDAO
     public boolean deleteUser(String id) {
         // TODO Auto-generated method stub
         Optional<User> user = getUserById(id);
-        if (user.isPresent()){
+        if (user.isPresent()) {
             try {
                 PreparedStatement stm = conn.get().prepareStatement("DELETE from users WHERE id = ?");
                 stm.setString(1, id);
                 int result = stm.executeUpdate();
-                if (result == 1 ){
+                if (result == 1) {
                     return true;
                 }
-    
-             
+
             } catch (SQLException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            
+
         }
         return false;
     }
 
     @Override
-    public Optional<User> modifyUser(String id,String emailActual, String emailNuevo, String name, String passNueva) {
+    public Optional<User> modifyUser(String id, String actualEmail, String newEmail, String name, String newPass) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method");
 
     }
 
     @Override
-    public Optional<User> addConversation(String idUser, String idConversation) {
+    public Optional<Conversation> createConversation(String userID, String convName) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addConversation'");
+        throw new UnsupportedOperationException("Unimplemented method 'createConversation'");
     }
-    
+
     @Override
-    public Optional<List<Dialogo>> getAllDialogosOfUser(String idUser) {
+    public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAllDialogosOfUser'");
     }
 
     @Override
-    public Optional<Dialogo> getDialogoOfUser(String idUser, String idDialogo) {
+    public Optional<Dialogue> getDialogueFromUser(String userID, String dialogueID) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
     }
-  
 
 }

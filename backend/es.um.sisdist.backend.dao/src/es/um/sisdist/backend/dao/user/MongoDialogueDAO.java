@@ -31,16 +31,16 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 
-import es.um.sisdist.backend.dao.models.Dialogo;
+import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.utils.Lazy;
 
-public class MongoDialogoDAO implements IDialogoDAO {
-    private Supplier<MongoCollection<Dialogo>> collection;
-    private static final Logger logger = Logger.getLogger(MongoDialogoDAO.class.getName());
+public class MongoDialogueDAO implements IDialogueDAO {
+    private Supplier<MongoCollection<Dialogue>> collection;
+    private static final Logger logger = Logger.getLogger(MongoDialogueDAO.class.getName());
 
-    public MongoDialogoDAO() {
+    public MongoDialogueDAO() {
         CodecProvider pojoCodecProvider = PojoCodecProvider.builder()
                 .conventions(asList(Conventions.ANNOTATION_CONVENTION)).automatic(true).build();
         CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
@@ -55,25 +55,25 @@ public class MongoDialogoDAO implements IDialogoDAO {
             MongoDatabase database = mongoClient
                     .getDatabase(Optional.ofNullable(System.getenv("DB_NAME")).orElse("ssdd"))
                     .withCodecRegistry(pojoCodecRegistry);
-            return database.getCollection("dialogos", Dialogo.class);
+            return database.getCollection("dialogos", Dialogue.class);
         });
     }
 
     @Override
-    public Optional<Dialogo> getDialogoById(String id) {
-        Optional<Dialogo> dialogo = Optional.ofNullable(collection.get().find(eq("id", id)).first());
+    public Optional<Dialogue> getDialogueByID(String id) {
+        Optional<Dialogue> dialogo = Optional.ofNullable(collection.get().find(eq("id", id)).first());
         return dialogo;
     }
 
     @Override
-    public Optional<Dialogo> crearDialogo(String id, String response, String prompt, Date timestamp) {
-        Optional<Dialogo> dialogoBD = getDialogoById(id);
+    public Optional<Dialogue> createDialogue(String id, String response, String prompt, Date timestamp) {
+        Optional<Dialogue> dialogoBD = getDialogueByID(id);
         if (!dialogoBD.isPresent()) {
-            Dialogo document;
+            Dialogue document;
             if(response == null){
-                document = new Dialogo(id, prompt, timestamp);
+                document = new Dialogue(id, prompt, timestamp);
             }else {
-                 document = new Dialogo(id, response, prompt, timestamp);
+                 document = new Dialogue(id, response, prompt, timestamp);
             }
             try{
                 collection.get().insertOne(document);
@@ -88,18 +88,18 @@ public class MongoDialogoDAO implements IDialogoDAO {
     }
 
     @Override
-    public boolean deleteDialogo(String id) {
+    public boolean deleteDialogue(String id) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteDialogo'");
     }
 
     @Override
-    public Optional<Dialogo> modifyDialogo(String id, String prompt, Optional<Date> timestamp, String response) {
+    public Optional<Dialogue> modifyDialogue(String id, String prompt, Optional<Date> timestamp, String response) {
         boolean error = false;
-        Optional<Dialogo> dialgoExists = getDialogoById(id);
+        Optional<Dialogue> dialgoExists = getDialogueByID(id);
 
         if (dialgoExists.isPresent()) {
-            Dialogo u = dialgoExists.get();
+            Dialogue u = dialgoExists.get();
             boolean changePrompt = true;
             if(!timestamp.isPresent()){
                 if(!prompt.isEmpty()){
@@ -130,7 +130,7 @@ public class MongoDialogoDAO implements IDialogoDAO {
                 }
                 UpdateResult result = collection.get().updateOne(filter, Updates.combine(updates));
                 if (result.getModifiedCount() == 1) {
-                    return getDialogoById(u.getId());
+                    return getDialogueByID(u.getId());
                 }
             }
         }

@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
-import es.um.sisdist.backend.dao.models.Dialogo;
+import es.um.sisdist.backend.dao.models.Conversation;
+import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 
 public interface IUserDAO
@@ -17,11 +18,11 @@ public interface IUserDAO
 
     public boolean deleteUser(String id);
     
-    public Optional<User> modifyUser(String id, String emailActual, String emailNuevo, String name, String passNueva);
+    public Optional<User> modifyUser(String id, String actualEmail, String newEmail, String name, String newPass);
     
-    public Optional<User> addConversation(String idUser, String idConversation);
+    public Optional<Conversation> createConversation(String userID, String convName);
 
-    public Optional<List<Dialogo>> getAllDialogosOfUser(String idUser);
+    public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID);
 
-    public Optional<Dialogo> getDialogoOfUser(String idUser, String idDialogo);
+    public Optional<Dialogue> getDialogueFromUser(String userID, String dialogueID);
 }
