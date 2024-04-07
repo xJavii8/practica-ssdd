@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block custom_style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='conversation.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="customContainer">
+    <div class="header">
+        <h2>Conversación: {{ convName }}</h2>
+        <button id="endConversation" class="btn btn-outline-warning">Finalizar conversación</button>
+    </div>
+    <div id="chatArea" class="chat-area" style="border: 1px solid #ccc; height: 400px; margin-bottom: 20px; overflow-y: scroll; padding: 10px;">
+    </div>
+    <form id="chatForm">
+        <div class="input-group mb-3">
+            <input type="text" id="userInput" class="form-control" placeholder="Escribe tu mensaje aquí..." aria-label="Mensaje" aria-describedby="button-addon2">
+            <div class="input-group-append">
+                <button class="btn btn-outline-primary" type="submit" id="button-addon2">Enviar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="confirmationDialog" class="customContainer confirmation-dialog" style="display: none;">
+    <div class="confirmation-content">
+        <p>¿Seguro que quieres finalizar la conversación?</p>
+        <button id="confirmEnd" class="btn btn-outline-danger">Sí</button>
+        <button id="cancelEnd" class="btn btn-outline-secondary">No</button>
+    </div>
+</div>
+
+
+<script src="{{ url_for('static', filename='scripts/conversation.js') }}"></script>
+
+{% endblock %}

@@ -12,7 +12,6 @@ public class ConversationSummary {
         this.status = status;
     }
 
-    // Getters y setters
     public String getName() {
         return name;
     }

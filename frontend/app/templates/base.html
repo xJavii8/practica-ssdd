@@ -61,9 +61,11 @@
           <li class="nav-item">
             <a class="nav-link {{ 'active' if active_page == 'index' else '' }}" aria-current="{{ 'page' if active_page == 'index' else 'false' }}" href="{{ url_for('index') }}">Inicio</a>
           </li>
+          {% if current_user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="#">Enlace 1</a>
+            <a class="nav-link {{ 'active' if active_page == 'allConversations' else '' }}" aria-current="{{ 'page' if active_page == 'allConversations' else 'false' }}" href="{{ url_for('allConversations') }}">Conversaciones</a>
           </li>
+          {% endif %}
         </ul>
 
         <ul class="navbar-nav ms-auto mb-2 mb-md-0">

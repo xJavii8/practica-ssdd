@@ -1,0 +1,29 @@
+.conversations-list {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.conversation-item {
+    border-bottom: 1px solid #eee;
+    padding: 10px 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.conversation-item:last-child {
+    border-bottom: none;
+}
+
+.conversation-name {
+    font-weight: bold;
+}
+
+.conversation-status {
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    padding: 5px 10px;
+    text-align: center;
+}

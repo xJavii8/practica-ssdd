@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block custom_style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='static/conversationsList.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="customContainer">
+    <h2>Conversaciones</h2>
+    <div class="conversations-list">
+        {% if allConvs %}
+            {% for conversation in allConvs %}
+            <div class="conversation-item">
+                <span class="conversation-name">{{ conversation.name }}</span>
+                <span class="conversation-status">{{ conversation.status }}</span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No hay conversaciones disponibles.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -32,9 +32,15 @@ def serve_static(path):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == "POST":
-        logging.info('REQUEST DATA: ' + request.form['convName'])
-        # Falta la lógica para mandar al REST
-        pass
+        convNameJSON = {"convName": request.form['convName']}
+        userID = str(format(current_user.id, '032x'))
+        createConvPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue', json=convNameJSON)
+        logging.info("CONV STATUS: " + str(createConvPOST.status_code))
+        if createConvPOST.status_code == 201:
+            logging.info("CONV: " + str(createConvPOST.headers))
+            return redirect(url_for('conversation', convName=request.form['convName']))
+        else:
+            flash('Ha ocurrido un error. Por favor, inténtalo de nuevo', 'danger')
     return render_template('index.html', active_page='index')
 
 
@@ -115,6 +121,26 @@ def deleteUser():
     else:
         flash('Ha ocurrido un error. Inténtalo de nuevo', 'danger')
         return redirect(url_for('profile'))
+    
+@app.route('/conversation', methods=['GET', 'POST'])
+@login_required
+def conversation():
+    convName = request.args['convName']
+    return render_template('conversation.html', active_page='conversation', convName=convName)
+
+@app.route('/allConversations', methods=['GET'])
+@login_required
+def allConversations():
+    userID = str(format(current_user.id, '032x'))
+    getConvGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue')
+    logging.info(getConvGET.status_code)
+    if getConvGET.status_code == 200:
+        logging.info(getConvGET.json())
+        allConvs = getConvGET.json().get('allConvs', None)
+    else:
+        allConvs = None
+    
+    return render_template('conversationsList.html', active_page='allConversations', allConvs=allConvs)
 
 
 @app.route('/logout')
