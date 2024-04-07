@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, url_for, request, redirect, flash, jsonify, make_response
+from flask import Flask, render_template, send_from_directory, url_for, request, redirect, flash, jsonify, make_response, session
 from flask_login import LoginManager, login_manager, current_user, login_user, login_required, logout_user
 import requests
 import os
@@ -38,7 +38,9 @@ def index():
         logging.info("CONV STATUS: " + str(createConvPOST.status_code))
         if createConvPOST.status_code == 201:
             logging.info("CONV: " + str(createConvPOST.headers))
-            return redirect(url_for('conversation', convName=request.form['convName']))
+            session['convName'] = request.form['convName']
+            session['convID'] = createConvPOST.json().get('convID')
+            return redirect(url_for('conversation'))
         else:
             flash('Esta conversación ya existe. Por favor, elige otro nombre', 'danger')
     return render_template('index.html', active_page='index')
@@ -126,18 +128,40 @@ def deleteUser():
 @login_required
 def conversation():
     userID = str(format(current_user.id, '032x'))
-    convName = request.args['convName']
-    return render_template('conversation.html', active_page='conversation', userID=userID, convName=convName)
+    convName = session['convName']
+    convID = session['convID']
+    if not convName:
+        flash("Esta conversación no existe.", "danger")
+        return redirect(url_for('index'))
+    else:
+        return render_template('conversation.html', active_page='conversation', convName=convName, convID=convID)
 
 @app.route('/endConv', methods=['POST'])
 @login_required
 def endConversation():
     userID = str(format(current_user.id, '032x'))
-    convName = request.json.get('convName')
-    endConvPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convName}/end')
+    convID = request.json.get('convID')
+    endConvPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}/end')
     logging.info("STATUS CODE: " + str(endConvPOST.status_code))
     if endConvPOST.status_code == 200:
         logging.info(endConvPOST.json())
+        return jsonify({"status": "ok"}), 200
+    else:
+        resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
+        return resp
+
+
+@app.route('/getConvData', methods=['POST'])
+@login_required
+def getConvData():
+    userID = str(format(current_user.id, '032x'))
+    convID = request.json.get('convID')
+    getConvDataGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}')
+    logging.info("STATUS CODE: " + str(getConvDataGET.status_code))
+    if getConvDataGET.status_code == 200:
+        logging.info(getConvDataGET.json())
+        session['convID'] = getConvDataGET.json().get('convID')
+        session['convName'] = getConvDataGET.json().get('convName')
         return jsonify({"status": "ok"}), 200
     else:
         resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)

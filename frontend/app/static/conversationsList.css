@@ -19,6 +19,14 @@
 
 .conversation-name {
     font-weight: bold;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.conversation-name:hover {
+    color: #0056b3;
+    text-decoration: none;
 }
 
 .status-ready {

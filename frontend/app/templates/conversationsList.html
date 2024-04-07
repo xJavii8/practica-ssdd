@@ -10,8 +10,9 @@
     <div class="conversations-list">
         {% if allConvs %}
         {% for conversation in allConvs %}
-        <div class="conversation-item">
-            <span class="conversation-name">{{ conversation.name }}</span>
+        <div class="conversation-item" id="conv-{{ loop.index}}">
+            <span class="conversation-name" data-convID="{{ conversation.id }}" style="cursor: pointer;">{{
+                conversation.name }}</span>
             <span
                 class="conversation-status 
             {% if conversation.status == 1 %}status-ready{% elif conversation.status == 2 %}status-busy{% elif conversation.status == 3 %}status-finished{% endif %}">
@@ -27,4 +28,6 @@
         {% endif %}
     </div>
 </div>
+
+<script src="{{ url_for('static', filename='scripts/conversationList.js') }}"></script>
 {% endblock %}

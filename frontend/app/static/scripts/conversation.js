@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Finalización de conversación
     document.getElementById('confirmEnd').addEventListener('click', function() {
         const dialogContainer = document.getElementById('confirmationDialog');
-        const conversationName = dialogContainer.getAttribute('data-convName');
+        const convID = dialogContainer.getAttribute('data-convID');
 
         // Solicitud backend
         fetch('/endConv', {
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                convName: conversationName
+                convID: convID
             })
         })
         .then(response => {
