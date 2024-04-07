@@ -151,15 +151,14 @@ public class User {
         return Optional.of(c);
     }
 
-    public Optional<List<Conversation>> endConversation(String convName) {
+    public Optional<List<Conversation>> endConversation(String convID) {
         Optional<Conversation> conv = conversations.stream()
-                .filter(conversation -> convName.equals(conversation.getName())
-                        && conversation.getEstado() != Conversation.FINISHED)
+                .filter(conversation -> convID.equals(conversation.getID()))
                 .findFirst();
 
         if (conv.isPresent()) {
             Conversation c = conv.get();
-            c.setEstado(Conversation.FINISHED);
+            c.setStatus(Conversation.FINISHED);
             int index = conversations.indexOf(c);
             conversations.set(index, c);
             return Optional.of(conversations);

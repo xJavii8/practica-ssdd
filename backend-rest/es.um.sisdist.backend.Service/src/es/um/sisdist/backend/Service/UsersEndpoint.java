@@ -1,7 +1,9 @@
 
 package es.um.sisdist.backend.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import es.um.sisdist.backend.Service.impl.AppLogicImpl;
@@ -11,6 +13,7 @@ import es.um.sisdist.models.AllConvsDTO;
 import es.um.sisdist.models.AllConvsDTOUtils;
 import es.um.sisdist.models.ChangeUserInfoDTO;
 import es.um.sisdist.models.ConvDTO;
+import es.um.sisdist.models.ConvDTOUtils;
 import es.um.sisdist.models.ConversationSummary;
 import es.um.sisdist.models.PromptDTO;
 import es.um.sisdist.models.UserDTO;
@@ -94,8 +97,9 @@ public class UsersEndpoint {
 
         UriBuilder builder = UriBuilder.fromResource(UsersEndpoint.class).path("{id}/dialogue/{name}");
         String convID = conv.get().getID();
-        String convName = conv.get().getName();
-        return Response.created(builder.build(convID, convName)).status(Status.CREATED).build();
+        Map<String, String> convJSON = new HashMap<>();
+        convJSON.put("convID", convID);
+        return Response.created(builder.build(id, convID)).entity(convJSON).status(Status.CREATED).build();
     }
 
     @GET
@@ -113,26 +117,25 @@ public class UsersEndpoint {
     }
 
     @GET
-    @Path("{id}/dialogue/{name}")
+    @Path("{id}/dialogue/{convID}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public AllConvsDTO getConvData(@PathParam("id") String id, @PathParam("name") String name) {
+    public ConvDTO getConvData(@PathParam("id") String id, @PathParam("convID") String convID) {
         
-        /*Optional<List<Conversation>> conv = impl.getConversations(id);
-        if (!conv.isPresent()) {
-            return new AllConvsDTO();
+        Optional<Conversation> c = impl.getConversationData(id, convID);
+        if (!c.isPresent()) {
+            return new ConvDTO();
         }
 
-        return AllConvsDTOUtils.toDTO(conv.get());*/
-        return null;
+        return ConvDTOUtils.toDTO(c.get());
     }
 
     @POST
-    @Path("{id}/dialogue/{name}/end")
+    @Path("{id}/dialogue/{convID}/end")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public boolean endConversation(@PathParam("id") String id, @PathParam("name") String name) {     
-        return impl.endConversation(id, name);
+    public boolean endConversation(@PathParam("id") String id, @PathParam("convID") String convID) {     
+        return impl.endConversation(id, convID);
     }
 
     /*@POST

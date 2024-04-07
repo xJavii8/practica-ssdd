@@ -178,13 +178,13 @@ public class MongoUserDAO implements IUserDAO {
     }
 
     @Override
-    public boolean checkIfConvExists(String userID, String convName) {
+    public boolean checkIfConvExists(String userID, String convID) {
         Optional<User> u = getUserById(userID);
         if (u.isPresent()) {
             User user = u.get();
             List<Conversation> conversations = user.getConversations();
             for(Conversation c : conversations) {
-                if(c.getName().equals(convName) && c.getEstado() != Conversation.FINISHED) {
+                if(c.getID().equals(convID)) {
                     return true;
                 }
             }
@@ -193,12 +193,27 @@ public class MongoUserDAO implements IUserDAO {
         return false;
     }
 
-    @Override
-    public boolean endConversation(String userID, String convName) {
+    public Optional<Conversation> getConvByID(String userID, String convID) {
         Optional<User> u = getUserById(userID);
         if (u.isPresent()) {
             User user = u.get();
-            Optional<List<Conversation>> conv = user.endConversation(convName);
+            List<Conversation> conversations = user.getConversations();
+            for(Conversation c : conversations) {
+                if(c.getID().equals(convID)) {
+                    return Optional.of(c);
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean endConversation(String userID, String convID) {
+        Optional<User> u = getUserById(userID);
+        if (u.isPresent()) {
+            User user = u.get();
+            Optional<List<Conversation>> conv = user.endConversation(convID);
             if(conv.isPresent()) {
                 List<Conversation> conversations = conv.get();
                 Bson filter = Filters.eq("id", userID);

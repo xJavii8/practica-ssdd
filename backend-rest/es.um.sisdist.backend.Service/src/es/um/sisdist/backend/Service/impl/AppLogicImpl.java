@@ -112,7 +112,6 @@ public class AppLogicImpl {
         if (u.isPresent()) {
             String hashed_pass = UserUtils.md5pass(pass);
             if (0 == hashed_pass.compareTo(u.get().getPassword_hash()))
-                logger.info("CONVERSACIONES:" + u.get().getConversations().toString());
                 return u;
         }
 
@@ -157,15 +156,24 @@ public class AppLogicImpl {
         if(u.isPresent()) {
             User user = u.get();
             return Optional.of(user.getConversations().stream()
-                   .map(conversation -> new ConversationSummary(conversation.getName(), conversation.getEstado()))
+                   .map(conversation -> new ConversationSummary(conversation.getName(), conversation.getStatus(), conversation.getID()))
                    .collect(Collectors.toList()));
         }
 
         return Optional.empty();
     }
 
-    public boolean endConversation(String userID, String convName) {
-        return dao.endConversation(userID, convName);
+    public boolean endConversation(String userID, String convID) {
+        return dao.endConversation(userID, convID);
+    }
+
+    public Optional<Conversation> getConversationData(String userID, String convID) {
+        Optional<Conversation> c = dao.getConvByID(userID, convID);
+        if(c.isPresent()) {
+            return c;
+        }
+
+        return Optional.empty();
     }
     
     public Optional<Conversation> sendPrompt(String idConversacion, String prompt, long time) {

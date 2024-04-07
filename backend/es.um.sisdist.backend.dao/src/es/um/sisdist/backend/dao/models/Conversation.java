@@ -11,28 +11,30 @@ public class Conversation {
     public static final int FINISHED = 3;
     private String id;
     private String name;
-    private int estado;
-    private List<Dialogue> dialogos;
+    private int status;
+    private List<Dialogue> dialogues;
+    private String nextURL;
+    private String endURL;
 
     public Conversation() {}
 
-    public Conversation(String id, String name, int estado) {
+    public Conversation(String id, String name, int status) {
         this.id = id;
         this.name = name;
-        this.estado = estado;
-        this.dialogos = new ArrayList<Dialogue>();
+        this.status = status;
+        this.dialogues = new ArrayList<Dialogue>();
     }
 
     public Conversation(String name) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
-        this.estado = Conversation.READY;
-        this.dialogos = new ArrayList<Dialogue>();
+        this.status = Conversation.READY;
+        this.dialogues = new ArrayList<Dialogue>();
     }
 
-    public Conversation(String id, String name, int estado, List<Dialogue> dialogos) {
-        this(id, name, estado);
-        this.dialogos = dialogos;
+    public Conversation(String id, String name, int status, List<Dialogue> dialogos) {
+        this(id, name, status);
+        this.dialogues = dialogos;
     }
 
     public String getID() {
@@ -51,28 +53,43 @@ public class Conversation {
         this.name = name;
     }
 
-    public int getEstado() {
-        return estado;
+    public int getStatus() {
+        return status;
     }
 
-    public void setEstado(int estado) {
-        this.estado = estado;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
-    public List<Dialogue> getDialogos() {
-        return dialogos;
+    public List<Dialogue> getDialogues() {
+        return dialogues;
     }
 
-    public void setDialogos(List<Dialogue> dialogos) {
-        this.dialogos = dialogos;
+    public void setDialogues(List<Dialogue> dialogues) {
+        this.dialogues = dialogues;
     }
 
-    public void addDialogos(Dialogue dialogo) {
-        this.dialogos.add(dialogo);
+    public void addDialogos(Dialogue dialogue) {
+        this.dialogues.add(dialogue);
     }
 
-    public void deleteDialogo(Dialogue dialogo) {
-        this.dialogos.remove(dialogo);
+    public void deleteDialogo(Dialogue dialogue) {
+        this.dialogues.remove(dialogue);
     }
 
+    public String getNextURL() {
+        return nextURL;
+    }
+
+    public void setNextURL(String next) {
+        this.nextURL = next;
+    }
+
+    public String getEndURL() {
+        return endURL;
+    }
+
+    public void setEndURL(String end) {
+        this.endURL = end;
+    }
 }

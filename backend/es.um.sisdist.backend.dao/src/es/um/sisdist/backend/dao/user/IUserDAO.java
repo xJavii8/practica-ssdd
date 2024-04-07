@@ -22,9 +22,11 @@ public interface IUserDAO
     
     public Optional<Conversation> createConversation(String userID, String convName);
 
-    public boolean checkIfConvExists(String userID, String convName);
+    public boolean checkIfConvExists(String userID, String convID);
 
-    public boolean endConversation(String userID, String convName);
+    public Optional<Conversation> getConvByID(String userID, String convID);
+
+    public boolean endConversation(String userID, String convID);
 
     public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID);
 
