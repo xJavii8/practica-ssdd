@@ -127,6 +127,14 @@ public class UsersEndpoint {
         return null;
     }
 
+    @POST
+    @Path("{id}/dialogue/{name}/end")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean endConversation(@PathParam("id") String id, @PathParam("name") String name) {     
+        return impl.endConversation(id, name);
+    }
+
     /*@POST
     @Path("/sendPrompt")
     @Consumes(MediaType.APPLICATION_JSON)

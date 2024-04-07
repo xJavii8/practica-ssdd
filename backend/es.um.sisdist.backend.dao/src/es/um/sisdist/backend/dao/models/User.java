@@ -150,4 +150,21 @@ public class User {
         this.conversations.add(c);
         return Optional.of(c);
     }
+
+    public Optional<List<Conversation>> endConversation(String convName) {
+        Optional<Conversation> conv = conversations.stream()
+                .filter(conversation -> convName.equals(conversation.getName())
+                        && conversation.getEstado() != Conversation.FINISHED)
+                .findFirst();
+
+        if (conv.isPresent()) {
+            Conversation c = conv.get();
+            c.setEstado(Conversation.FINISHED);
+            int index = conversations.indexOf(c);
+            conversations.set(index, c);
+            return Optional.of(conversations);
+        }
+
+        return Optional.empty();
+    }
 }

@@ -139,12 +139,17 @@ public class AppLogicImpl {
     }
 
     public Optional<Conversation> createConversation(String userID, String name) {
-        Optional<Conversation> c = dao.createConversation(userID, name);
-        if(!c.isPresent()) {
-            return Optional.empty();
+        boolean convExists = dao.checkIfConvExists(userID, name);
+        if(convExists == false) {
+            Optional<Conversation> c = dao.createConversation(userID, name);
+            if(!c.isPresent()) {
+                return Optional.empty();
+            }
+
+            return c;
         }
 
-        return c;
+        return Optional.empty();
     }
 
     public Optional<List<ConversationSummary>> getConversations(String userID) {
@@ -157,6 +162,10 @@ public class AppLogicImpl {
         }
 
         return Optional.empty();
+    }
+
+    public boolean endConversation(String userID, String convName) {
+        return dao.endConversation(userID, convName);
     }
     
     public Optional<Conversation> sendPrompt(String idConversacion, String prompt, long time) {

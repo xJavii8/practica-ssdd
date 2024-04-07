@@ -178,6 +178,41 @@ public class MongoUserDAO implements IUserDAO {
     }
 
     @Override
+    public boolean checkIfConvExists(String userID, String convName) {
+        Optional<User> u = getUserById(userID);
+        if (u.isPresent()) {
+            User user = u.get();
+            List<Conversation> conversations = user.getConversations();
+            for(Conversation c : conversations) {
+                if(c.getName().equals(convName) && c.getEstado() != Conversation.FINISHED) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean endConversation(String userID, String convName) {
+        Optional<User> u = getUserById(userID);
+        if (u.isPresent()) {
+            User user = u.get();
+            Optional<List<Conversation>> conv = user.endConversation(convName);
+            if(conv.isPresent()) {
+                List<Conversation> conversations = conv.get();
+                Bson filter = Filters.eq("id", userID);
+                UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+                if (result.getModifiedCount() == 1) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    @Override
     public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAllDialogosOfUser'");

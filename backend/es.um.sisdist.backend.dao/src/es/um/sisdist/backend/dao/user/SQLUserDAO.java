@@ -165,4 +165,16 @@ public class SQLUserDAO implements IUserDAO {
         throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
     }
 
+    @Override
+    public boolean endConversation(String userID, String convName) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'endConversation'");
+    }
+
+    @Override
+    public boolean checkIfConvExists(String userID, String convName) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'checkIfConvExists'");
+    }
+
 }
