@@ -21,9 +21,24 @@
     font-weight: bold;
 }
 
+.status-ready {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-busy {
+    background-color: #ffc107;
+    color: black;
+}
+
+.status-finished {
+    background-color: #dc3545;
+    color: white;
+}
+
 .conversation-status {
-    background-color: #f0f0f0;
     border-radius: 20px;
     padding: 5px 10px;
     text-align: center;
+    font-weight: bold;
 }

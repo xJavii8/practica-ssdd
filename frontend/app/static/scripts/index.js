@@ -10,10 +10,12 @@ document.addEventListener("DOMContentLoaded", function() {
     var button = document.querySelector('#button-addon2');
 
     // Deshabilitamos el botón, para no crear conversaciones con nombres vacíos
-    button.disabled = true;
+    if (input && button) {
+        button.disabled = true;
 
-    input.addEventListener('input', function() {
-        // Si hay texto se habilita el botón, de lo contrario, se deshabilita
-        button.disabled = !this.value.length;
-    });
+        input.addEventListener('input', function() {
+            // Si hay texto se habilita el botón, de lo contrario, se deshabilita
+            button.disabled = !this.value.length;
+        });
+    }
 });

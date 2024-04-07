@@ -26,29 +26,31 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Finalización de conversación
     document.getElementById('confirmEnd').addEventListener('click', function() {
+        const dialogContainer = document.getElementById('confirmationDialog');
+        const conversationName = dialogContainer.getAttribute('data-convName');
+
         // Solicitud backend
-        fetch('PLACEHOLDER', {
+        fetch('/endConv', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                // PLACEHOLDER
+                convName: conversationName
             })
         })
         .then(response => {
-            if (response.ok) {
-                return response.json(); // PLACEHOLDER
+            if (!response.ok) {
+                throw new Error('Algo salió mal al finalizar la conversación.');
             }
-            throw new Error('Algo salió mal al finalizar la conversación.');
+            return response.json();
         })
         .then(data => {
-            // PLACEHOLDER
+            console.log(data.message);
             window.location.href = '/';
         })
         .catch(error => {
             console.error('Error:', error);
-            // Error
         });
 
         document.getElementById('confirmationDialog').style.display = 'none';

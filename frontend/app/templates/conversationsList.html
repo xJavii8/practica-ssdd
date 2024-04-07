@@ -9,14 +9,21 @@
     <h2>Conversaciones</h2>
     <div class="conversations-list">
         {% if allConvs %}
-            {% for conversation in allConvs %}
-            <div class="conversation-item">
-                <span class="conversation-name">{{ conversation.name }}</span>
-                <span class="conversation-status">{{ conversation.status }}</span>
-            </div>
-            {% endfor %}
+        {% for conversation in allConvs %}
+        <div class="conversation-item">
+            <span class="conversation-name">{{ conversation.name }}</span>
+            <span
+                class="conversation-status 
+            {% if conversation.status == 1 %}status-ready{% elif conversation.status == 2 %}status-busy{% elif conversation.status == 3 %}status-finished{% endif %}">
+                {% if conversation.status == 1 %}LISTA
+                {% elif conversation.status == 2 %}OCUPADA
+                {% elif conversation.status == 3 %}FINALIZADA
+                {% endif %}
+            </span>
+        </div>
+        {% endfor %}
         {% else %}
-            <p>No hay conversaciones disponibles.</p>
+        <p>No hay conversaciones disponibles.</p>
         {% endif %}
     </div>
 </div>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, url_for, request, redirect, flash
+from flask import Flask, render_template, send_from_directory, url_for, request, redirect, flash, jsonify, make_response
 from flask_login import LoginManager, login_manager, current_user, login_user, login_required, logout_user
 import requests
 import os
@@ -40,7 +40,7 @@ def index():
             logging.info("CONV: " + str(createConvPOST.headers))
             return redirect(url_for('conversation', convName=request.form['convName']))
         else:
-            flash('Ha ocurrido un error. Por favor, inténtalo de nuevo', 'danger')
+            flash('Esta conversación ya existe. Por favor, elige otro nombre', 'danger')
     return render_template('index.html', active_page='index')
 
 
@@ -125,8 +125,24 @@ def deleteUser():
 @app.route('/conversation', methods=['GET', 'POST'])
 @login_required
 def conversation():
+    userID = str(format(current_user.id, '032x'))
     convName = request.args['convName']
-    return render_template('conversation.html', active_page='conversation', convName=convName)
+    return render_template('conversation.html', active_page='conversation', userID=userID, convName=convName)
+
+@app.route('/endConv', methods=['POST'])
+@login_required
+def endConversation():
+    userID = str(format(current_user.id, '032x'))
+    convName = request.json.get('convName')
+    endConvPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convName}/end')
+    logging.info("STATUS CODE: " + str(endConvPOST.status_code))
+    if endConvPOST.status_code == 200:
+        logging.info(endConvPOST.json())
+        return jsonify({"status": "ok"}), 200
+    else:
+        resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
+        return resp
+
 
 @app.route('/allConversations', methods=['GET'])
 @login_required
