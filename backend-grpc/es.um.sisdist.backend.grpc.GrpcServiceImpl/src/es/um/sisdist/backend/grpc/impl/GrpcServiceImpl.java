@@ -2,6 +2,7 @@ package es.um.sisdist.backend.grpc.impl;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -187,4 +188,51 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 		return super.obtainCollage(responseObserver);
 	}
 	*/
+}
+
+
+ class InnerGrpcServiceImplToLlama extends Thread{
+	private URL urlLlamachat;
+	private String idDialogo;
+	private String idConv;
+
+	public InnerGrpcServiceImplToLlama(URL connection, String idDialogo, String idConv) {
+		this.urlLlamachat = connection;
+		this.idDialogo = idDialogo;
+		this.idConv = idConv;
+	}
+	@Override
+	public void run(){
+		super.run();
+		StringBuffer response = new StringBuffer();
+		HttpURLConnection connection;
+		int responseCode;
+		while(true) {
+			try {
+				connection = (HttpURLConnection) urlLlamachat.openConnection();
+				connection.setRequestMethod("GET");
+				responseCode = connection.getResponseCode();
+				System.out.println("Response Code: " + responseCode);
+				if(responseCode == 200) {
+					BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            		String inputLine;
+					while ((inputLine = in.readLine()) != null) {
+						response.append(inputLine);
+					}
+					in.close();
+					
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		
+	}
+
+
+
+
+	
 }

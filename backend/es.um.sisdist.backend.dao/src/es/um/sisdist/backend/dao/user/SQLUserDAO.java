@@ -183,4 +183,10 @@ public class SQLUserDAO implements IUserDAO {
         throw new UnsupportedOperationException("Unimplemented method 'getConvByID'");
     }
 
+    @Override
+    public boolean addDialogueToConversation(String userID, String convID, String dialogueID) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addDialogueToConversation'");
+    }
+
 }

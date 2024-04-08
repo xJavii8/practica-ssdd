@@ -28,7 +28,10 @@ public interface IUserDAO
 
     public boolean endConversation(String userID, String convID);
 
+    public boolean addDialogueToConversation(String userID, String convID, String dialogueID);
+
     public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID);
 
     public Optional<Dialogue> getDialogueFromUser(String userID, String dialogueID);
+
 }

@@ -37,6 +37,7 @@ message GETRequest
 {
 	string answerURL = 1;
 	string idConversation = 2;
+	string idUser=3;
 }
 
 message GETResponse

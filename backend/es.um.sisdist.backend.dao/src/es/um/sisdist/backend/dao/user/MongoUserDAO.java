@@ -226,6 +226,7 @@ public class MongoUserDAO implements IUserDAO {
 
         return false;
     }
+    
 
     @Override
     public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID) {
@@ -236,6 +237,11 @@ public class MongoUserDAO implements IUserDAO {
     @Override
     public Optional<Dialogue> getDialogueFromUser(String userID, String dialogueID) {
         // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
+    }
+
+    @Override
+    public boolean addDialogueToConversation(String userID, String convID, String dialogueID) {
         throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
     }
 }
