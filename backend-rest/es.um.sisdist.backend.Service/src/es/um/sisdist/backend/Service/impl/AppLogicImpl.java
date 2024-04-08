@@ -162,7 +162,7 @@ public class AppLogicImpl {
             
         } catch (StatusRuntimeException e) {
             return Optional.empty();
-            
+    
         }
 
         return conversacionDAO.getConversacionById(idConversacion);
