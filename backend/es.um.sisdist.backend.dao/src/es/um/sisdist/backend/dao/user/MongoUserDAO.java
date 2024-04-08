@@ -37,7 +37,8 @@ import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
-import es.um.sisdist.backend.dao.models.Dialogo;
+import es.um.sisdist.backend.dao.models.Conversation;
+import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.utils.Lazy;
@@ -84,18 +85,18 @@ public class MongoUserDAO implements IUserDAO {
     @Override
     public Optional<User> crearUser(String email, String password, String name) {
 
-        Optional<User> e = getUserByEmail(email);
-        if (!e.isPresent()) {
+        Optional<User> u = getUserByEmail(email);
+        if (!u.isPresent()) {
             String token = UUID.randomUUID().toString();
             // Nota: El id se genera ya en la función.
-            User document = new User(email, UserUtils.md5pass(password), name, token, 0);
+            User user = new User(email, UserUtils.md5pass(password), name, token, 0);
             try {
-                collection.get().insertOne(document);
+                collection.get().insertOne(user);
             } catch (MongoException except) {
                 except.printStackTrace();
                 return Optional.empty();
             }
-            return Optional.of(document);
+            return Optional.of(user);
         }
         return Optional.empty();
 
@@ -116,35 +117,35 @@ public class MongoUserDAO implements IUserDAO {
     }
 
     @Override
-    public Optional<User> modifyUser(String id, String emailActual, String emailNuevo, String name, String passNueva) {
+    public Optional<User> modifyUser(String id, String actualEmail, String newEmail, String name, String newPass) {
         boolean error = false;
-        Optional<User> userExists = getUserByEmail(emailActual);
+        Optional<User> userExists = getUserByEmail(actualEmail);
 
         if (userExists.isPresent()) {
             User u = userExists.get();
 
-            if (!emailNuevo.isEmpty() && !emailActual.equals(emailNuevo)) {
-                Optional<User> userWithNewEmail = getUserByEmail(emailNuevo);
+            if (!newEmail.isEmpty() && !actualEmail.equals(newEmail)) {
+                Optional<User> userWithNewEmail = getUserByEmail(newEmail);
                 if (userWithNewEmail.isPresent()) {
                     error = true;
                 }
             }
 
             if (error == false) {
-                Bson filter = Filters.eq("email", emailActual);
+                Bson filter = Filters.eq("email", actualEmail);
                 ArrayList<Bson> updates = new ArrayList<>();
 
                 if (!u.getName().equals(name)) {
                     updates.add(Updates.set("name", name));
                 }
 
-                if (!emailNuevo.isEmpty()) {
-                    updates.add(Updates.set("id", UserUtils.md5pass(emailNuevo)));
-                    updates.add(Updates.set("email", emailNuevo));
+                if (!newEmail.isEmpty()) {
+                    updates.add(Updates.set("id", UserUtils.md5pass(newEmail)));
+                    updates.add(Updates.set("email", newEmail));
                 }
 
-                if (!passNueva.isEmpty()) {
-                    updates.add(Updates.set("password_hash", UserUtils.md5pass(passNueva)));
+                if (!newPass.isEmpty()) {
+                    updates.add(Updates.set("password_hash", UserUtils.md5pass(newPass)));
                 }
 
                 UpdateResult result = collection.get().updateOne(filter, Updates.combine(updates));
@@ -158,17 +159,82 @@ public class MongoUserDAO implements IUserDAO {
     }
 
     @Override
-    public Optional<User> addConversation(String idUser, String idConversation) {
-        throw new UnsupportedOperationException("Unimplemented method 'addConversation'");
+    public Optional<Conversation> createConversation(String userID, String convName) {
+        Optional<User> u = getUserById(userID);
+        if (u.isPresent()) {
+            User user = u.get();
+            Optional<Conversation> conv = user.createConversation(convName);
+            if(conv.isPresent()) {
+                List<Conversation> conversations = user.getConversations();
+                Bson filter = Filters.eq("id", userID);
+                UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+                if (result.getModifiedCount() == 1) {
+                    return conv;
+                }
+            }
+        }
+
+        return Optional.empty();
     }
+
     @Override
-    public Optional<List<Dialogo>> getAllDialogosOfUser(String idUser) {
+    public boolean checkIfConvExists(String userID, String convID) {
+        Optional<User> u = getUserById(userID);
+        if (u.isPresent()) {
+            User user = u.get();
+            List<Conversation> conversations = user.getConversations();
+            for(Conversation c : conversations) {
+                if(c.getID().equals(convID)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public Optional<Conversation> getConvByID(String userID, String convID) {
+        Optional<User> u = getUserById(userID);
+        if (u.isPresent()) {
+            User user = u.get();
+            List<Conversation> conversations = user.getConversations();
+            for(Conversation c : conversations) {
+                if(c.getID().equals(convID)) {
+                    return Optional.of(c);
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean endConversation(String userID, String convID) {
+        Optional<User> u = getUserById(userID);
+        if (u.isPresent()) {
+            User user = u.get();
+            Optional<List<Conversation>> conv = user.endConversation(convID);
+            if(conv.isPresent()) {
+                List<Conversation> conversations = conv.get();
+                Bson filter = Filters.eq("id", userID);
+                UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+                if (result.getModifiedCount() == 1) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAllDialogosOfUser'");
     }
 
     @Override
-    public Optional<Dialogo> getDialogoOfUser(String idUser, String idDialogo) {
+    public Optional<Dialogue> getDialogueFromUser(String userID, String dialogueID) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
     }

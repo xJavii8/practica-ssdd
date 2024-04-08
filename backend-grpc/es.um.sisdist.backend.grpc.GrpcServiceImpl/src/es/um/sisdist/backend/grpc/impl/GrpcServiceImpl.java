@@ -15,10 +15,10 @@ import es.um.sisdist.backend.grpc.PingRequest;
 import es.um.sisdist.backend.grpc.PingResponse;
 import es.um.sisdist.backend.grpc.POSTRequest;
 import es.um.sisdist.backend.grpc.POSTResponse;
-import es.um.sisdist.backend.dao.models.Conversacion;
-import es.um.sisdist.backend.dao.models.Dialogo;
-import es.um.sisdist.backend.dao.user.MongoConversacionDAO;
-import es.um.sisdist.backend.dao.user.MongoDialogoDAO;
+import es.um.sisdist.backend.dao.models.Conversation;
+import es.um.sisdist.backend.dao.models.Dialogue;
+import es.um.sisdist.backend.dao.user.MongoConvDAO;
+import es.um.sisdist.backend.dao.user.MongoDialogueDAO;
 import es.um.sisdist.backend.grpc.GETRequest;
 import es.um.sisdist.backend.grpc.GETResponse;
 import io.grpc.stub.StreamObserver;
@@ -26,8 +26,8 @@ import io.grpc.stub.StreamObserver;
 class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase 
 {
 	private Logger logger;
-	MongoDialogoDAO dialogoDAO = new MongoDialogoDAO();
-	MongoConversacionDAO conversacionDAO = new MongoConversacionDAO();
+	MongoDialogueDAO dialogoDAO = new MongoDialogueDAO();
+	MongoConvDAO conversacionDAO = new MongoConvDAO();
 	
     public GrpcServiceImpl(Logger logger) 
     {
@@ -98,7 +98,7 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 	{
 		try {
 			StringBuffer response = new StringBuffer();
-			Conversacion conv = conversacionDAO.getConversacionById(request.getIdConversation()).get();
+			Conversation conv = conversacionDAO.getConvByID(request.getIdConversation()).get();
 			String idDialogo = request.getAnswerURL().split("/")[2];
 			logger.info(idDialogo);
 			//conversacionDAO.modifyConversacion(conv.getId(), Conversacion.BUSY);
@@ -118,8 +118,8 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 						response.append(inputLine);
 					}
 					in.close();
-					Optional<Dialogo> dialogo = dialogoDAO.modifyDialogo(idDialogo, "", Optional.empty(), response.toString());
-					conversacionDAO.addDialogo(conv.getId(), idDialogo);
+					Optional<Dialogue> dialogo = dialogoDAO.modifyDialogue(idDialogo, "", Optional.empty(), response.toString());
+					conversacionDAO.addDialogue(conv.getID(), idDialogo);
 					//conversacionDAO.modifyConversacion(conv.getId(), Conversacion.READY);
 					System.out.println(response.toString());
 					break;

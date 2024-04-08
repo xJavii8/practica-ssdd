@@ -6,34 +6,34 @@
 
 {% block content %}
 <div class="text-center mt-5 fw-bold">
-<h1>
-    <img src="{{ url_for('static', filename='mainIcon.webp') }}" alt="LlamaChat Logo" style="height:100px;">LlamaChat
-</h1>
-<div class="customContainer col-md-8 mx-auto lead">
-    {% if current_user.is_authenticated %}
-        Bienvenido, <strong>{{current_user.name}}</strong>. Para crear una conversación, indica cómo quieres que se llame:
+    <h1>
+        <img src="{{ url_for('static', filename='mainIcon.webp') }}" alt="LlamaChat Logo" style="height:100px;">LlamaChat
+    </h1>
+    <div class="customContainer col-md-8 mx-auto lead">
+        {% if current_user.is_authenticated %}
+            Bienvenido, <strong>{{current_user.name}}</strong>. Para crear una conversación, indica cómo quieres que se llame:
 
-        <form method="POST">
-            <div class="input-group mb-3 convName mx-auto">
-                <input name="convName" type="text" class="form-control" placeholder="Nombre de la conversación" aria-label="Nombre de la conversación" aria-describedby="button-addon2" maxlength="100">
-                <button class="btn btn-outline-primary" type="submit" id="button-addon2">Crear</button>
-            </div>
-        </form>
+            <form method="POST">
+                <div class="input-group mb-3 convName mx-auto">
+                    <input name="convName" type="text" class="form-control" placeholder="Nombre de la conversación" aria-label="Nombre de la conversación" aria-describedby="button-addon2" maxlength="100">
+                    <button class="btn btn-outline-primary" type="submit" id="button-addon2">Crear</button>
+                </div>
+            </form>
 
-    {% else %}
-        Bienvenido. Para iniciar una conversación, <a href="/login">inicia sesión</a> o <a href="/signup">regístrate</a>.
-    {% endif %}
-</div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+        {% else %}
+            Bienvenido. Para iniciar una conversación, <a href="/login">inicia sesión</a> o <a href="/signup">regístrate</a>.
+        {% endif %}
+    </div>
 </div>
 
-<div class="customContainer col-md-10 mx-auto">
-    <form method="POST">
-        <div class="textarea-wrapper">
-            <textarea id="prompt" name="textarea" class="form-control" placeholder="Mensaje..." oninput="ajustarAltura(this)"></textarea>
-            <button id="send" class="btn btn-primary btn-inside-textarea" type="submit">Enviar</button>
-        </div>
-        <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
-    </form>
-</div>
+<script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
 
 {% endblock %}

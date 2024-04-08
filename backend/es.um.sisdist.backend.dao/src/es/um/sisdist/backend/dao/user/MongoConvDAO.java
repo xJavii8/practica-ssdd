@@ -28,18 +28,18 @@ import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
-import es.um.sisdist.backend.dao.models.Conversacion;
-import es.um.sisdist.backend.dao.models.Dialogo;
+import es.um.sisdist.backend.dao.models.Conversation;
+import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.utils.Lazy;
 
-public class MongoConversacionDAO implements IConversacionDAO{
-    private Supplier<MongoCollection<Conversacion>> collection;
-    private static final Logger logger = Logger.getLogger(MongoConversacionDAO.class.getName());
-    private MongoDialogoDAO dialogoDAO = new MongoDialogoDAO();
+public class MongoConvDAO implements IConvDAO {
+    private Supplier<MongoCollection<Conversation>> collection;
+    private static final Logger logger = Logger.getLogger(MongoConvDAO.class.getName());
+    private MongoDialogueDAO dialogoDAO = new MongoDialogueDAO();
 
-     public MongoConversacionDAO() {
+    public MongoConvDAO() {
         CodecProvider pojoCodecProvider = PojoCodecProvider.builder()
                 .conventions(asList(Conventions.ANNOTATION_CONVENTION)).automatic(true).build();
         CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
@@ -54,63 +54,67 @@ public class MongoConversacionDAO implements IConversacionDAO{
             MongoDatabase database = mongoClient
                     .getDatabase(Optional.ofNullable(System.getenv("DB_NAME")).orElse("ssdd"))
                     .withCodecRegistry(pojoCodecRegistry);
-            return database.getCollection("conversaciones", Conversacion.class);
+            return database.getCollection("conversaciones", Conversation.class);
         });
     }
 
     @Override
-    public Optional<Conversacion> getConversacionById(String id) {
-        Optional<Conversacion> conversacion = Optional.ofNullable(collection.get().find(eq("id", id)).first());
+    public Optional<Conversation> getConvByID(String id) {
+        Optional<Conversation> conversacion = Optional.ofNullable(collection.get().find(eq("id", id)).first());
         return conversacion;
     }
 
     @Override
-    public Optional<Conversacion> crearConversacion(String id, int estado) {
-          Optional<Conversacion> conversacionBD = getConversacionById(id);
+    public Optional<Conversation> createConv(String id, String name, int status) {
+        Optional<Conversation> conversacionBD = getConvByID(id);
+        logger.info("CREATE CONV: ID OBTENIDA");
         if (!conversacionBD.isPresent()) {
-            Conversacion document = new Conversacion(id, estado);
-            try{
-                collection.get().insertOne(document);
-            }catch(MongoException e){
-                e.printStackTrace();
+            Conversation convDoc = new Conversation(id, name, status);
+            logger.info("CONVERSACION CREADA");
+            try {
+                collection.get().insertOne(convDoc);
+                logger.info("CREATE CONV: INSERTADA");
+            } catch (MongoException e) {
+                logger.info("CREATE CONV: EXCEPTION");
+                logger.info(e.getLocalizedMessage());
                 return Optional.empty();
             }
-           return Optional.of(document);
-
+            logger.info("CREATE CONV: RETORNADA");
+            return Optional.of(convDoc);
         }
+        logger.info("CREATE CONV: EMPTY");
         return Optional.empty();
     }
 
     @Override
-    public boolean deleteConversacion(String id) {
+    public boolean deleteConv(String id) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteConversacion'");
     }
 
     @Override
-    public Optional<Conversacion> modifyConversacion(String id, int estado) {
+    public Optional<Conversation> modifyConv(String id, int status) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'modifyConversacion'");
     }
 
     @Override
-    public Optional<Conversacion> addDialogo(String idConversacion, String idDialogo) {
-        Optional<Conversacion> conversacionBD = getConversacionById(idConversacion);
-        Optional<Dialogo> dialogo = dialogoDAO.getDialogoById(idDialogo);
-        
-        if(conversacionBD.isPresent() && dialogo.isPresent()){
-            Conversacion cv = conversacionBD.get();
-            Dialogo d = dialogo.get();
-            Bson filter = Filters.eq("id", idConversacion);
+    public Optional<Conversation> addDialogue(String convID, String dialogueID) {
+        Optional<Conversation> conv = getConvByID(convID);
+        Optional<Dialogue> dialogo = dialogoDAO.getDialogueByID(dialogueID);
+
+        if (conv.isPresent() && dialogo.isPresent()) {
+            Conversation cv = conv.get();
+            Dialogue d = dialogo.get();
+            Bson filter = Filters.eq("id", convID);
             ArrayList<Bson> updates = new ArrayList<>();
             updates.add(Updates.set("dialogos", d));
             UpdateResult result = collection.get().updateOne(filter, Updates.combine(updates));
             if (result.getModifiedCount() == 1) {
-                    return getConversacionById(idConversacion);
-                }
+                return getConvByID(convID);
             }
+        }
         return Optional.empty();
     }
-    
-    
+
 }

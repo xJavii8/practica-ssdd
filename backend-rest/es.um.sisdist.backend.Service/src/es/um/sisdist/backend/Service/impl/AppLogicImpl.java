@@ -8,12 +8,14 @@ import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.glassfish.jersey.internal.util.Tokenizer;
 import org.glassfish.jersey.message.internal.Token;
 
 import com.google.protobuf.Option;
 import java.util.Date;
+import java.util.List;
 
 import es.um.sisdist.backend.grpc.GETRequest;
 import es.um.sisdist.backend.grpc.GETResponse;
@@ -21,17 +23,18 @@ import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
 import es.um.sisdist.backend.grpc.POSTRequest;
 import es.um.sisdist.backend.grpc.POSTResponse;
 import es.um.sisdist.backend.grpc.PingRequest;
+import es.um.sisdist.models.ConversationSummary;
 import es.um.sisdist.models.UserDTO;
 import es.um.sisdist.models.UserDTOUtils;
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
 import es.um.sisdist.backend.dao.IDAOFactory;
-import es.um.sisdist.backend.dao.models.Conversacion;
-import es.um.sisdist.backend.dao.models.Dialogo;
+import es.um.sisdist.backend.dao.models.Conversation;
+import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.user.IUserDAO;
-import es.um.sisdist.backend.dao.user.MongoConversacionDAO;
-import es.um.sisdist.backend.dao.user.MongoDialogoDAO;
+import es.um.sisdist.backend.dao.user.MongoConvDAO;
+import es.um.sisdist.backend.dao.user.MongoDialogueDAO;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -43,8 +46,8 @@ import io.grpc.StatusRuntimeException;
 public class AppLogicImpl {
     IDAOFactory daoFactory;
     IUserDAO dao;
-    MongoDialogoDAO dialogoDAO = new MongoDialogoDAO();
-    MongoConversacionDAO conversacionDAO = new MongoConversacionDAO();
+    MongoDialogueDAO diaDAO = new MongoDialogueDAO();
+    MongoConvDAO convDAO = new MongoConvDAO();
 
     private static final Logger logger = Logger.getLogger(AppLogicImpl.class.getName());
     private static final SecureRandom secureRandom = new SecureRandom(); // threadsafe
@@ -134,12 +137,46 @@ public class AppLogicImpl {
         return dao.deleteUser(id);
     }
 
-    public Optional<Conversacion> creatConversacion(){
-        Optional<Conversacion> c = conversacionDAO.crearConversacion(UUID.randomUUID().toString(), Conversacion.READY);
-        return c;
+    public Optional<Conversation> createConversation(String userID, String name) {
+        boolean convExists = dao.checkIfConvExists(userID, name);
+        if(convExists == false) {
+            Optional<Conversation> c = dao.createConversation(userID, name);
+            if(!c.isPresent()) {
+                return Optional.empty();
+            }
+
+            return c;
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<List<ConversationSummary>> getConversations(String userID) {
+        Optional<User> u = dao.getUserById(userID);
+        if(u.isPresent()) {
+            User user = u.get();
+            return Optional.of(user.getConversations().stream()
+                   .map(conversation -> new ConversationSummary(conversation.getName(), conversation.getStatus(), conversation.getID()))
+                   .collect(Collectors.toList()));
+        }
+
+        return Optional.empty();
+    }
+
+    public boolean endConversation(String userID, String convID) {
+        return dao.endConversation(userID, convID);
+    }
+
+    public Optional<Conversation> getConversationData(String userID, String convID) {
+        Optional<Conversation> c = dao.getConvByID(userID, convID);
+        if(c.isPresent()) {
+            return c;
+        }
+
+        return Optional.empty();
     }
     
-    public Optional<Conversacion> addDialogo(String idConversacion, String prompt, long time) {
+    public Optional<Conversation> sendPrompt(String idConversacion, String prompt, long time) {
 
         POSTRequest req1 = POSTRequest.newBuilder().setPrompt(prompt).build();
         POSTResponse resp1;
@@ -152,7 +189,7 @@ public class AppLogicImpl {
 
             logger.info("RESPUESTA POST: " + resp1.getLocalization());
             
-            Dialogo d = dialogoDAO.crearDialogo(resp1.getLocalization().split("/")[2], null, prompt, new Date(time)).get();
+            Dialogue d = diaDAO.createDialogue(resp1.getLocalization().split("/")[2], null, prompt, new Date(time)).get();
 
             GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(idConversacion).build();
 
@@ -165,7 +202,7 @@ public class AppLogicImpl {
     
         }
 
-        return conversacionDAO.getConversacionById(idConversacion);
+        return convDAO.getConvByID(idConversacion);
     }
 
     public Optional<User> modifyUser(String actualEmail, String newMail, String name, String password) {
@@ -175,16 +212,4 @@ public class AppLogicImpl {
         }
         return Optional.empty();
     }
-
-    // Actualizar visitas podria ser una funcion muy recurrente
-    /*
-     * public Optional<User> modifyUserVisits(String id, int visits){
-     * Optional<User> u = dao.getUserById(id);
-     * if(u.isPresent()){
-     * u.get().setVisits(visits);
-     * return dao.modifyUser(u.get());
-     * }
-     * return Optional.empty();
-     * }
-     */
 }
