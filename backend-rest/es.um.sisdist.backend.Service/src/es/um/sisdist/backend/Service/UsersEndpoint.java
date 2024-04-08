@@ -1,6 +1,8 @@
 
 package es.um.sisdist.backend.Service;
 
+import static com.mongodb.MongoClientSettings.builder;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +145,10 @@ public class UsersEndpoint {
     public Response sendPrompt(PromptDTO pDTO) {
         Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt());
         
-        return null;
+        if(c.isPresent()){
+        return Response.accepted().build();
+        }
+        return Response.status(404).build();
     }
 
     
