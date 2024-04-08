@@ -176,7 +176,10 @@ public class AppLogicImpl {
         return Optional.empty();
     }
     
-    public Optional<Conversation> sendPrompt(String idConversacion, String prompt, long time) {
+    public Optional<Conversation> sendPrompt(String userID, String convID, String prompt) {
+
+        logger.info("CONVID: " + convID);
+        logger.info("PROMPT: " + prompt);
 
         POSTRequest req1 = POSTRequest.newBuilder().setPrompt(prompt).build();
         POSTResponse resp1;
@@ -189,9 +192,9 @@ public class AppLogicImpl {
 
             logger.info("RESPUESTA POST: " + resp1.getLocalization());
             
-            Dialogue d = diaDAO.createDialogue(resp1.getLocalization().split("/")[2], null, prompt, new Date(time)).get();
+            //Dialogue d = diaDAO.createDialogue(resp1.getLocalization().split("/")[2], null, prompt, new Date(time)).get();
 
-            GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(idConversacion).build();
+            GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(convID).build();
 
             resp2 = blockingStub.promptGET(req2);
 
@@ -202,7 +205,7 @@ public class AppLogicImpl {
             
         }
 
-        return convDAO.getConvByID(idConversacion);
+        return convDAO.getConvByID(convID);
     }
 
     public Optional<User> modifyUser(String actualEmail, String newMail, String name, String password) {

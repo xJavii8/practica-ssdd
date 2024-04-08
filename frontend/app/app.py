@@ -38,8 +38,11 @@ def index():
         logging.info("CONV STATUS: " + str(createConvPOST.status_code))
         if createConvPOST.status_code == 201:
             logging.info("CONV: " + str(createConvPOST.headers))
+            logging.info("JSON: " + str(createConvPOST.json()))
             session['convName'] = request.form['convName']
-            session['convID'] = createConvPOST.json().get('convID')
+            session['convID'] = createConvPOST.json().get('ID')
+            session['next'] = createConvPOST.json().get('nextURL')
+            session['end'] = createConvPOST.json().get('endURL')
             return redirect(url_for('conversation'))
         else:
             flash('Esta conversación ya existe. Por favor, elige otro nombre', 'danger')
@@ -149,6 +152,20 @@ def endConversation():
     else:
         resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
         return resp
+    
+@app.route('/sendPrompt', methods=['POST'])
+@login_required
+def sendPrompt():
+    userID = str(format(current_user.id, '032x'))
+    nextURL = session['next']
+    logging.info("NEXTURL: " + str(nextURL))
+    logging.info(session.__str__)
+    json = {'userID': userID, 'convID': session['convID'], 'prompt': request.json.get('prompt')}
+    sendPromptPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service{nextURL}', json=json)
+    logging.info("STATUS CODE: " + str(sendPromptPOST.status_code))
+    if sendPromptPOST.status_code == 200:
+       logging.info("OK")
+    return None
 
 
 @app.route('/getConvData', methods=['POST'])
@@ -162,6 +179,8 @@ def getConvData():
         logging.info(getConvDataGET.json())
         session['convID'] = getConvDataGET.json().get('convID')
         session['convName'] = getConvDataGET.json().get('convName')
+        session['next'] = getConvDataGET.json().get('nextURL')
+        session['end'] = getConvDataGET.json().get('endURL')
         return jsonify({"status": "ok"}), 200
     else:
         resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)

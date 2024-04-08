@@ -96,10 +96,8 @@ public class UsersEndpoint {
         }
 
         UriBuilder builder = UriBuilder.fromResource(UsersEndpoint.class).path("{id}/dialogue/{name}");
-        String convID = conv.get().getID();
-        Map<String, String> convJSON = new HashMap<>();
-        convJSON.put("convID", convID);
-        return Response.created(builder.build(id, convID)).entity(convJSON).status(Status.CREATED).build();
+        Conversation c = conv.get();
+        return Response.created(builder.build(id, c.getID())).entity(c).status(Status.CREATED).build();
     }
 
     @GET
@@ -138,18 +136,15 @@ public class UsersEndpoint {
         return impl.endConversation(id, convID);
     }
 
-    /*@POST
-    @Path("/sendPrompt")
+    @POST
+    @Path("{id}/dialogue/{convID}/next/{timestamp}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendPrompt(PromptDTO pDTO) {
-        Optional<Conversation> conv = impl.createConversation(pDTO.getQuestion());
-        if (!conv.isPresent()) {
-            return Response.status(Status.NO_CONTENT).build();
-        }
-
-        return Response.status(Status.OK).build();
-    }*/
+        Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt());
+        
+        return null;
+    }
 
     
 
