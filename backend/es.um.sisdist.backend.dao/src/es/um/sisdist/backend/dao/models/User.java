@@ -146,7 +146,7 @@ public class User {
     }
 
     public Optional<Conversation> createConversation(String convName) {
-        Conversation c = new Conversation(convName);
+        Conversation c = new Conversation(this.id, convName);
         this.conversations.add(c);
         return Optional.of(c);
     }

@@ -69,10 +69,10 @@ public class MongoConvDAO implements IConvDAO {
         Optional<Conversation> conversacionBD = getConvByID(id);
         logger.info("CREATE CONV: ID OBTENIDA");
         if (!conversacionBD.isPresent()) {
-            Conversation convDoc = new Conversation(id, name, status);
+            //Conversation convDoc = new Conversation(id, name, status);
             logger.info("CONVERSACION CREADA");
             try {
-                collection.get().insertOne(convDoc);
+               // collection.get().insertOne(convDoc);
                 logger.info("CREATE CONV: INSERTADA");
             } catch (MongoException e) {
                 logger.info("CREATE CONV: EXCEPTION");
@@ -80,7 +80,7 @@ public class MongoConvDAO implements IConvDAO {
                 return Optional.empty();
             }
             logger.info("CREATE CONV: RETORNADA");
-            return Optional.of(convDoc);
+            return Optional.empty();
         }
         logger.info("CREATE CONV: EMPTY");
         return Optional.empty();

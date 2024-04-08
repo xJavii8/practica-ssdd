@@ -1,33 +1,58 @@
 package es.um.sisdist.models;
 
+import es.um.sisdist.backend.dao.models.Conversation;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class PromptDTO {
-    private String question;
-    private String answer;
+    private String userID;
+    private String convID;
+    private String prompt;
+    private ConvDTO conversation;
 
     public PromptDTO() {
     }
 
-    public PromptDTO(String question) {
-        this.question = question;
+    public PromptDTO(String userID, String convID, String prompt) {
+        this.userID = userID;
+        this.convID = convID;
+        this.prompt = prompt;
     }
 
-    public String getQuestion() {
-        return question;
+    public PromptDTO(Conversation conversation) {
+        this.conversation = ConvDTOUtils.toDTO(conversation);
     }
 
-    public void setQuestion(String question) {
-        this.question = question;
+    public String getPrompt() {
+        return prompt;
     }
 
-    public String getAnswer() {
-        return answer;
+    public void setPrompt(String prompt) {
+        this.prompt = prompt;
     }
 
-    public void setAnswer(String answer) {
-        this.answer = answer;
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+
+    public String getConvID() {
+        return convID;
+    }
+
+    public void setConvID(String convID) {
+        this.convID = convID;
+    }
+
+    public ConvDTO getConversation() {
+        return conversation;
+    }
+
+    public void setConversation(Conversation conversation) {
+        this.conversation = ConvDTOUtils.toDTO(conversation);
     }
 
 }

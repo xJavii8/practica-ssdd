@@ -99,7 +99,6 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 	{
 		try {
 			StringBuffer response = new StringBuffer();
-			Conversation conv = conversacionDAO.getConvByID(request.getIdConversation()).get();
 			String idDialogo = request.getAnswerURL().split("/")[2];
 			logger.info(idDialogo);
 			//conversacionDAO.modifyConversacion(conv.getId(), Conversacion.BUSY);
@@ -120,7 +119,7 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 					}
 					in.close();
 					Optional<Dialogue> dialogo = dialogoDAO.modifyDialogue(idDialogo, "", Optional.empty(), response.toString());
-					conversacionDAO.addDialogue(conv.getID(), idDialogo);
+					//conversacionDAO.addDialogue(conv.getID(), idDialogo);
 					//conversacionDAO.modifyConversacion(conv.getId(), Conversacion.READY);
 					System.out.println(response.toString());
 					break;

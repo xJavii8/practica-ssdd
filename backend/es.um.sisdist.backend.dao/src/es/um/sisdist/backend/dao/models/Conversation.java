@@ -18,22 +18,26 @@ public class Conversation {
 
     public Conversation() {}
 
-    public Conversation(String id, String name, int status) {
+    public Conversation(String userID, String id, String name, int status) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.dialogues = new ArrayList<Dialogue>();
+        this.nextURL = ("/u/" + userID + "/dialogue/" + this.id + "/next/" + String.valueOf(System.currentTimeMillis()));
+        this.endURL = ("/u/" + userID + "/dialogue/" + this.id + "/end");
     }
 
-    public Conversation(String name) {
+    public Conversation(String userID, String name) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
         this.status = Conversation.READY;
         this.dialogues = new ArrayList<Dialogue>();
+        this.nextURL = ("/u/" + userID + "/dialogue/" + this.id + "/next/" + String.valueOf(System.currentTimeMillis()));
+        this.endURL = ("/u/" + userID + "/dialogue/" + this.id + "/end");
     }
 
-    public Conversation(String id, String name, int status, List<Dialogue> dialogos) {
-        this(id, name, status);
+    public Conversation(String userID, String id, String name, int status, List<Dialogue> dialogos) {
+        this(userID, id, name, status);
         this.dialogues = dialogos;
     }
 
