@@ -166,6 +166,38 @@ public class User {
 
         return Optional.empty();
     }
+    public Optional<List<Conversation>> addDialogue(String convID, Dialogue dialogue){
+        Optional<Conversation> conv = conversations.stream()
+            .filter(conversations -> convID.equals(conversations.getID()))
+            .findFirst();
 
+            if(conv.isPresent()){
+                Conversation c = conv.get();
+                c.addDialogos(dialogue);
+                c.setStatus(Conversation.BUSY);
+                int index = conversations.indexOf(c);
+                conversations.set(index, c);
+                return Optional.of(conversations);
+            }
+            return Optional.empty();
+    }
+    public Optional<List<Conversation>> addResponse(String convID, String dialogueID, String response){
+        Optional<Conversation> conv = conversations.stream()
+        .filter(conversations -> convID.equals(conversations.getID()))
+        .findFirst();
+
+        if (conv.isPresent()){
+            Conversation c = conv.get();
+        
+            if(!c.addResponse(dialogueID, response)){
+                return Optional.empty();
+            }
+            c.setStatus(Conversation.READY);
+            int index = conversations.indexOf(c);
+            conversations.set(index, c);
+            return Optional.of(conversations);
+        }
+        return Optional.empty();
+    }
     
 }

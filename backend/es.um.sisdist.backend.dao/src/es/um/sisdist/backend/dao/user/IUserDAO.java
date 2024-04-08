@@ -1,5 +1,6 @@
 package es.um.sisdist.backend.dao.user;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -28,7 +29,9 @@ public interface IUserDAO
 
     public boolean endConversation(String userID, String convID);
 
-    public boolean addDialogueToConversation(String userID, String convID, String dialogueID);
+    public boolean createDialogue(String userID, String convID, String dialogueID,  String prompt, Date timestamp);
+
+    public boolean addResponse(String userID, String convID, String dialogueID, String response);
 
     public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID);
 

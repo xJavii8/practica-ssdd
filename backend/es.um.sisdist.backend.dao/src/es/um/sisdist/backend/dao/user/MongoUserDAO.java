@@ -10,6 +10,7 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import static java.util.Arrays.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import com.mysql.cj.jdbc.result.UpdatableResultSet;
 
 import es.um.sisdist.backend.dao.models.Conversation;
 import es.um.sisdist.backend.dao.models.Dialogue;
@@ -241,7 +243,39 @@ public class MongoUserDAO implements IUserDAO {
     }
 
     @Override
-    public boolean addDialogueToConversation(String userID, String convID, String dialogueID) {
-        throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
+    public boolean createDialogue(String userID, String convID, String dialogueID, String prompt, Date timestamp) {
+        Optional<User> u =getUserById(userID);
+        if (u.isPresent()) {
+            User user = u.get();
+            Optional<List<Conversation>> conv = user.addDialogue(convID,new Dialogue(dialogueID, prompt, timestamp));
+            if(conv.isPresent()){
+                List<Conversation> conversations = conv.get();
+                Bson filter = Filters.eq("id", userID);
+                UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+                if (result.getModifiedCount() == 1){
+                    return true;
+                }
+            }    
+        }
+        return false;
+        }
+
+    @Override
+    public boolean addResponse(String userID, String convID, String dialogueID, String response) {
+       Optional<User> u = getUserById(userID);
+       if(u.isPresent()){
+        User user = u.get();
+        Optional<List<Conversation>> conv = user.addResponse(convID, dialogueID, response);
+        if(conv.isPresent()){
+            List<Conversation> conversations = conv.get();
+            Bson filter = Filters.eq("id",userID);
+            UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+            if (result.getModifiedCount() == 1){
+                return true;
+            }
+        }
+       }
+       return false;
     }
-}
+    }
+

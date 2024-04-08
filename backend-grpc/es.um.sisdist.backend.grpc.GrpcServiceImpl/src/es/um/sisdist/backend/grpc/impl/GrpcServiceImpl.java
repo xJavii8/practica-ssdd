@@ -18,8 +18,10 @@ import es.um.sisdist.backend.grpc.POSTRequest;
 import es.um.sisdist.backend.grpc.POSTResponse;
 import es.um.sisdist.backend.dao.models.Conversation;
 import es.um.sisdist.backend.dao.models.Dialogue;
+import es.um.sisdist.backend.dao.user.IUserDAO;
 import es.um.sisdist.backend.dao.user.MongoConvDAO;
 import es.um.sisdist.backend.dao.user.MongoDialogueDAO;
+import es.um.sisdist.backend.dao.user.MongoUserDAO;
 import es.um.sisdist.backend.grpc.GETRequest;
 import es.um.sisdist.backend.grpc.GETResponse;
 import io.grpc.stub.StreamObserver;
@@ -27,8 +29,7 @@ import io.grpc.stub.StreamObserver;
 class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase 
 {
 	private Logger logger;
-	MongoDialogueDAO dialogoDAO = new MongoDialogueDAO();
-	MongoConvDAO conversacionDAO = new MongoConvDAO();
+
 	
     public GrpcServiceImpl(Logger logger) 
     {
@@ -101,35 +102,10 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 			StringBuffer response = new StringBuffer();
 			String idDialogo = request.getAnswerURL().split("/")[2];
 			logger.info(idDialogo);
-			//conversacionDAO.modifyConversacion(conv.getId(), Conversacion.BUSY);
-			while(true) {
-
-				URL url = new URL("http://llamachat:5020" + request.getAnswerURL());
-				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-				
-				connection.setRequestMethod("GET");
-				int responseCode = connection.getResponseCode();
-				System.out.println("Response Code: " + responseCode);
-
-				if(responseCode == 200) {
-					BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            		String inputLine;
-					while ((inputLine = in.readLine()) != null) {
-						response.append(inputLine);
-					}
-					in.close();
-					Optional<Dialogue> dialogo = dialogoDAO.modifyDialogue(idDialogo, "", Optional.empty(), response.toString());
-					//conversacionDAO.addDialogue(conv.getID(), idDialogo);
-					//conversacionDAO.modifyConversacion(conv.getId(), Conversacion.READY);
-					System.out.println(response.toString());
-					break;
-				} else {
-					Thread.sleep(5000);
-					continue;
-				}
-			}
-
-			GETResponse resp = GETResponse.newBuilder().setAnswerText(response.toString()).build();
+			
+			URL url = new URL("http://llamachat:5020" + request.getAnswerURL());
+			new InnerGrpcServiceImplToLlama(url,request.getIdUser(),idDialogo,request.getIdConversation()).run();
+			GETResponse resp = GETResponse.newBuilder().setAnswerText(idDialogo).build();
 			responseObserver.onNext(resp);
 			responseObserver.onCompleted();
 
@@ -194,9 +170,11 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 	private URL urlLlamachat;
 	private String idDialogo;
 	private String idConv;
-
-	public InnerGrpcServiceImplToLlama(URL connection, String idDialogo, String idConv) {
+	private String idUser;
+	MongoUserDAO userDAO = new MongoUserDAO();
+	public InnerGrpcServiceImplToLlama(URL connection, String idUser, String idDialogo, String idConv) {
 		this.urlLlamachat = connection;
+		this.idUser= idUser;
 		this.idDialogo = idDialogo;
 		this.idConv = idConv;
 	}
@@ -219,15 +197,22 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 						response.append(inputLine);
 					}
 					in.close();
-					
+					break;				
+				}else {
+					 sleep(5000);
+					 continue;
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				break;
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			
 			}
-
 		}
-		
+		userDAO.addResponse(idUser, idConv, idDialogo, response.toString());
 	}
 
 

@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -184,9 +185,15 @@ public class SQLUserDAO implements IUserDAO {
     }
 
     @Override
-    public boolean addDialogueToConversation(String userID, String convID, String dialogueID) {
+    public boolean createDialogue(String userID, String convID, String dialogueID, String prompt, Date timestamp) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addDialogueToConversation'");
+        throw new UnsupportedOperationException("Unimplemented method 'createDialogue'");
+    }
+
+    @Override
+    public boolean addResponse(String userID, String convID, String dialogueID, String response) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addResponse'");
     }
 
 }

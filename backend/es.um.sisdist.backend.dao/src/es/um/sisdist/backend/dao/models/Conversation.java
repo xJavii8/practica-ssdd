@@ -2,7 +2,10 @@ package es.um.sisdist.backend.dao.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+
+import javax.swing.text.html.Option;
 
 public class Conversation {
 
@@ -95,5 +98,19 @@ public class Conversation {
 
     public void setEndURL(String end) {
         this.endURL = end;
+    }
+    public boolean addResponse(String idDialogue, String response){
+        Optional<Dialogue> dialogo = dialogues.stream()
+            .filter(dialogue -> idDialogue.equals(dialogue.getId()))
+            .findFirst();
+        if (dialogo.isPresent()){
+            Dialogue d = dialogo.get();
+            int index = dialogues.indexOf(d);
+            d.setResponse(response);
+            dialogues.set(index, d);
+            return true;
+        }
+
+        return false;
     }
 }

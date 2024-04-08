@@ -193,12 +193,12 @@ public class AppLogicImpl {
             logger.info("RESPUESTA POST: " + resp1.getLocalization());
             
             //Dialogue d = diaDAO.createDialogue(resp1.getLocalization().split("/")[2], null, prompt, new Date(time)).get();
-
-            GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(convID).build();
+            dao.createDialogue(userID, convID,resp1.getLocalization().split("/")[2] , prompt, new Date(System.currentTimeMillis()));
+            GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(convID).setIdUser(userID).build();
 
             resp2 = blockingStub.promptGET(req2);
 
-            logger.info("RESPUESTA GET: " + resp2.getAnswerText());
+            logger.info("ID Dialogo: " + resp2.getAnswerText());
             
         } catch (StatusRuntimeException e) {
             return Optional.empty();
