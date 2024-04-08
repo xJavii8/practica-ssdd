@@ -205,7 +205,7 @@ public class AppLogicImpl {
     
         }
 
-        return convDAO.getConvByID(convID);
+        return dao.getConvByID(userID, convID);
     }
 
     public Optional<User> modifyUser(String actualEmail, String newMail, String name, String password) {

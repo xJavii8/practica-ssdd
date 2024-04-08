@@ -146,7 +146,7 @@ public class UsersEndpoint {
         Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt());
         
         if(c.isPresent()){
-        return Response.accepted().build();
+        return Response.status(200).build();
         }
         return Response.status(404).build();
     }
