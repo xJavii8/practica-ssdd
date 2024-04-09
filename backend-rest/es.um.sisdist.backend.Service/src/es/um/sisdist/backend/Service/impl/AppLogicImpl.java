@@ -202,7 +202,6 @@ public class AppLogicImpl {
             
         } catch (StatusRuntimeException e) {
             return Optional.empty();
-    
         }
 
         return dao.getConvByID(userID, convID);
