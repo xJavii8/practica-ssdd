@@ -103,7 +103,6 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 		try {
 			StringBuffer response = new StringBuffer();
 			String idDialogo = request.getAnswerURL().split("/")[2];
-			logger.info(idDialogo);
 			
 			URL url = new URL("http://llamachat:5020" + request.getAnswerURL());
 			new InnerGrpcServiceImplToLlama(url,request.getIdUser(),idDialogo,request.getIdConversation()).run();

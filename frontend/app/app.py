@@ -35,10 +35,7 @@ def index():
         convNameJSON = {"convName": request.form['convName']}
         userID = str(format(current_user.id, '032x'))
         createConvPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue', json=convNameJSON)
-        logging.info("CONV STATUS: " + str(createConvPOST.status_code))
         if createConvPOST.status_code == 201:
-            logging.info("CONV: " + str(createConvPOST.headers))
-            logging.info("JSON: " + str(createConvPOST.json()))
             session['convName'] = request.form['convName']
             session['convID'] = createConvPOST.json().get('ID')
             session['next'] = createConvPOST.json().get('nextURL')
@@ -130,12 +127,9 @@ def deleteUser():
 @app.route('/conversation', methods=['GET', 'POST'])
 @login_required
 def conversation():
-    userID = str(format(current_user.id, '032x'))
     convName = session['convName']
     convID = session['convID']
     dialogues = session.get('messages', None)
-    logging.info(session)
-    logging.info("DIALOGUES: " + str(dialogues))
     if not convName:
         flash("Esta conversación no existe.", "danger")
         return redirect(url_for('index'))
@@ -148,9 +142,7 @@ def endConversation():
     userID = str(format(current_user.id, '032x'))
     convID = request.json.get('convID')
     endConvPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}/end')
-    logging.info("STATUS CODE: " + str(endConvPOST.status_code))
     if endConvPOST.status_code == 200:
-        logging.info(endConvPOST.json())
         return jsonify({"status": "ok"}), 200
     else:
         resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
@@ -161,13 +153,9 @@ def endConversation():
 def sendPrompt():
     userID = str(format(current_user.id, '032x'))
     nextURL = session['next']
-    logging.info("NEXTURL: " + str(nextURL))
-    logging.info(session.__str__)
     json = {'userID': userID, 'convID': session['convID'], 'prompt': request.json.get('prompt')}
     sendPromptPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service{nextURL}', json=json)
-    logging.info("STATUS CODE: " + str(sendPromptPOST.status_code))
     if sendPromptPOST.status_code == 200:
-       logging.info(sendPromptPOST.json())
        return sendPromptPOST.json()
 
 
@@ -177,9 +165,7 @@ def getConvData():
     userID = str(format(current_user.id, '032x'))
     convID = request.json.get('convID')
     getConvDataGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}')
-    logging.info("STATUS CODE: " + str(getConvDataGET.status_code))
     if getConvDataGET.status_code == 200:
-        logging.info(getConvDataGET.json())
         session['convID'] = getConvDataGET.json().get('convID')
         session['convName'] = getConvDataGET.json().get('convName')
         session['next'] = getConvDataGET.json().get('nextURL')
@@ -196,9 +182,7 @@ def getConvData():
 def allConversations():
     userID = str(format(current_user.id, '032x'))
     getConvGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue')
-    logging.info(getConvGET.status_code)
     if getConvGET.status_code == 200:
-        logging.info(getConvGET.json())
         allConvs = getConvGET.json().get('allConvs', None)
     else:
         allConvs = None

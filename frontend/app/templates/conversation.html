@@ -35,7 +35,6 @@
 
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
-        // Llama a loadMessages aquí para asegurar que se ejecute después de que la página se haya cargado completamente
         const messages = {{ dialogues|tojson }};
         loadMessages(messages);
     });

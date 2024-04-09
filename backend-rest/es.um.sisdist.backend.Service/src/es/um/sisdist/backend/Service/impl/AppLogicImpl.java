@@ -33,8 +33,6 @@ import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.user.IUserDAO;
-import es.um.sisdist.backend.dao.user.MongoConvDAO;
-import es.um.sisdist.backend.dao.user.MongoDialogueDAO;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -46,8 +44,6 @@ import io.grpc.StatusRuntimeException;
 public class AppLogicImpl {
     IDAOFactory daoFactory;
     IUserDAO dao;
-    MongoDialogueDAO diaDAO = new MongoDialogueDAO();
-    MongoConvDAO convDAO = new MongoConvDAO();
 
     private static final Logger logger = Logger.getLogger(AppLogicImpl.class.getName());
     private static final SecureRandom secureRandom = new SecureRandom(); // threadsafe
@@ -178,17 +174,11 @@ public class AppLogicImpl {
     }
 
     public Optional<Conversation> sendPrompt(String userID, String convID, String prompt) {
-
-        logger.info("CONVID: " + convID);
-        logger.info("PROMPT: " + prompt);
-
         POSTRequest req1 = POSTRequest.newBuilder().setPrompt(prompt).build();
         POSTResponse resp1;
 
         try {
             resp1 = blockingStub.promptPOST(req1);
-
-            logger.info("RESPUESTA POST: " + resp1.getLocalization());
             dao.createDialogue(userID, convID, resp1.getLocalization().split("/")[2], prompt,
                     new Date(System.currentTimeMillis()));
             GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(convID)
