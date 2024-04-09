@@ -185,7 +185,7 @@ public class SQLUserDAO implements IUserDAO {
     }
 
     @Override
-    public boolean createDialogue(String userID, String convID, String dialogueID, String prompt, Date timestamp) {
+    public boolean createDialogue(String userID, String convID, String dialogueID, String prompt, long timestamp) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'createDialogue'");
     }

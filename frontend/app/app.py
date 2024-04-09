@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_manager, current_user, login_user, l
 import requests
 import os
 import logging
+from datetime import datetime
 
 # Usuarios
 from models import users, User
@@ -40,6 +41,7 @@ def index():
             session['convID'] = createConvPOST.json().get('ID')
             session['next'] = createConvPOST.json().get('nextURL')
             session['end'] = createConvPOST.json().get('endURL')
+            session['messages'] = None
             return redirect(url_for('conversation'))
         else:
             flash('Esta conversación ya existe. Por favor, elige otro nombre', 'danger')
@@ -130,7 +132,8 @@ def conversation():
     convName = session['convName']
     convID = session['convID']
     dialogues = session.get('messages', None)
-    if not convName:
+    logging.info("DIALOGUES: " + str(dialogues))
+    if not convName or not convID:
         flash("Esta conversación no existe.", "danger")
         return redirect(url_for('index'))
     else:
@@ -153,10 +156,17 @@ def endConversation():
 def sendPrompt():
     userID = str(format(current_user.id, '032x'))
     nextURL = session['next']
-    json = {'userID': userID, 'convID': session['convID'], 'prompt': request.json.get('prompt')}
+    timestamp = datetime.now()
+    timestamp = datetime.timestamp(timestamp)
+    timestamp = round(timestamp * 1000)
+    json = {'userID': userID, 'convID': session['convID'], 'prompt': request.json.get('prompt'), 'timestamp': timestamp}
     sendPromptPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service{nextURL}', json=json)
     if sendPromptPOST.status_code == 200:
+       logging.info(sendPromptPOST.json())
        return sendPromptPOST.json()
+    elif sendPromptPOST.status_code == 204:
+        flash("Error: esta conversación aún no está lista para mandar más mensajes", "danger")
+        return make_response('', 204)
 
 
 @app.route('/getConvData', methods=['POST'])
@@ -171,6 +181,7 @@ def getConvData():
         session['next'] = getConvDataGET.json().get('nextURL')
         session['end'] = getConvDataGET.json().get('endURL')
         session['messages'] = getConvDataGET.json().get('dialogues')
+        logging.info(session['messages'])
         return jsonify({"status": "ok"}), 200
     else:
         resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)

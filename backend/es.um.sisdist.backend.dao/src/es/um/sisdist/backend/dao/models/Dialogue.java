@@ -1,29 +1,27 @@
 package es.um.sisdist.backend.dao.models;
 
-import java.util.Date;
-
 public class Dialogue {
     private String id;
-    private String response;
+    private String answer;
     private String prompt;
-    private Date timestamp;
+    private long timestamp;
 
-    public Dialogue() {}
+    public Dialogue() {
+    }
 
-    public Dialogue(String id, String response, String prompt, Date timestamp) {
+    public Dialogue(String id, String answer, String prompt, long timestamp) {
         this.id = id;
-        this.response = response;
+        this.answer = answer;
         this.prompt = prompt;
-
         this.timestamp = timestamp;
     }
 
-    public Dialogue(String id, String prompt, Date timestamp) {
+    public Dialogue(String id, String prompt, long timestamp) {
         this.id = id;
         this.prompt = prompt;
 
         this.timestamp = timestamp;
-        this.response = null;
+        this.answer = null;
     }
 
     public String getId() {
@@ -34,12 +32,12 @@ public class Dialogue {
         this.id = id;
     }
 
-    public String getResponse() {
-        return response;
+    public String getAnswer() {
+        return answer;
     }
 
-    public void setResponse(String response) {
-        this.response = response;
+    public void setAnswer(String answer) {
+        this.answer = answer;
     }
 
     public String getPrompt() {
@@ -50,11 +48,11 @@ public class Dialogue {
         this.prompt = prompt;
     }
 
-    public Date getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 

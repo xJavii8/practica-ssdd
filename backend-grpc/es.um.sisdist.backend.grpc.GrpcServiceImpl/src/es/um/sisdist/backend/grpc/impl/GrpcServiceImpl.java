@@ -1,11 +1,12 @@
 package es.um.sisdist.backend.grpc.impl;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -47,16 +48,20 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 			URL url = new URL("http://llamachat:5020/prompt");
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("POST");
-			connection.setRequestProperty("Content-Type", "application/json");
+			connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
 
 			// Habilitar envío de datos
 			connection.setDoOutput(true);
 
 			// Crear el cuerpo de la petición
-			String jsonInputString = "{\"prompt\": \"" + request.getPrompt() + "\"}";
+			Document doc = new Document("prompt", request.getPrompt());
+			String json = doc.toJson();
 
-			try(DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-				wr.writeBytes(jsonInputString);
+			logger.info(json);
+
+			try (OutputStream os = connection.getOutputStream()) {
+				byte[] input = json.getBytes("utf-8");
+				os.write(input, 0, input.length);
 			}
 
 			int responseCode = connection.getResponseCode();
@@ -136,7 +141,7 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 				responseCode = connection.getResponseCode();
 				System.out.println("Response Code: " + responseCode);
 				if(responseCode == 200) {
-					BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+					BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
             		String inputLine;
 					while ((inputLine = in.readLine()) != null) {
 						response.append(inputLine);

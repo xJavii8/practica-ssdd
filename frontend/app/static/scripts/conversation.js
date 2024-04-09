@@ -23,14 +23,25 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: JSON.stringify({ prompt: userText })
             })
             .then(response => {
+
+                if(response.status === 204) {
+                    console.log("No se puede mandar un mensaje mientras está en BUSY o FINISHED");
+                    return {status: 204};
+                }
+
                 if (!response.ok) {
                     throw new Error('Error al enviar el mensaje');
                 }
                 return response.json();
             })
             .then(data => {
-                const lastDialogue = data.dialogues[data.dialogues.length - 1]
-                addMessage('model', lastDialogue.response);
+                if(data.status === 204) {
+                    window.location.reload();
+                    console.log("No se puede mandar un mensaje mientras está en BUSY o FINISHED");
+                } else if(data.dialogues && data.dialogues.length > 0) {
+                    const lastDialogue = data.dialogues[data.dialogues.length - 1];
+                    addMessage('model', lastDialogue.answer);
+                }
             })
             .catch(error => {
                 console.error("Error:", error);
@@ -67,6 +78,8 @@ document.addEventListener("DOMContentLoaded", function() {
             return response.json();
         })
         .then(data => {
+            console.log("DATA: ");
+            console.log(data);
             console.log(data.message);
             window.location.href = '/';
         })
@@ -113,8 +126,8 @@ function loadMessages(dialogues) {
     dialogues.forEach(dialogue => {
         console.log("DIALOGUE: " + dialogue);
         console.log("DIALOGUE PROMPT: " + dialogue.prompt);
-        console.log("DIALOGUE RESPONSE: " + dialogue.response);
+        console.log("DIALOGUE RESPONSE: " + dialogue.answer);
         addMessage('user', dialogue.prompt);
-        addMessage('model', dialogue.response);
+        addMessage('model', dialogue.answer);
     });
 }

@@ -166,7 +166,7 @@ public class MongoUserDAO implements IUserDAO {
         if (u.isPresent()) {
             User user = u.get();
             Optional<Conversation> conv = user.createConversation(convName);
-            if(conv.isPresent()) {
+            if (conv.isPresent()) {
                 List<Conversation> conversations = user.getConversations();
                 Bson filter = Filters.eq("id", userID);
                 UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
@@ -185,8 +185,8 @@ public class MongoUserDAO implements IUserDAO {
         if (u.isPresent()) {
             User user = u.get();
             List<Conversation> conversations = user.getConversations();
-            for(Conversation c : conversations) {
-                if(c.getID().equals(convID)) {
+            for (Conversation c : conversations) {
+                if (c.getID().equals(convID)) {
                     return true;
                 }
             }
@@ -200,8 +200,8 @@ public class MongoUserDAO implements IUserDAO {
         if (u.isPresent()) {
             User user = u.get();
             List<Conversation> conversations = user.getConversations();
-            for(Conversation c : conversations) {
-                if(c.getID().equals(convID)) {
+            for (Conversation c : conversations) {
+                if (c.getID().equals(convID)) {
                     return Optional.of(c);
                 }
             }
@@ -216,7 +216,7 @@ public class MongoUserDAO implements IUserDAO {
         if (u.isPresent()) {
             User user = u.get();
             Optional<List<Conversation>> conv = user.endConversation(convID);
-            if(conv.isPresent()) {
+            if (conv.isPresent()) {
                 List<Conversation> conversations = conv.get();
                 Bson filter = Filters.eq("id", userID);
                 UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
@@ -228,7 +228,6 @@ public class MongoUserDAO implements IUserDAO {
 
         return false;
     }
-    
 
     @Override
     public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID) {
@@ -243,39 +242,38 @@ public class MongoUserDAO implements IUserDAO {
     }
 
     @Override
-    public boolean createDialogue(String userID, String convID, String dialogueID, String prompt, Date timestamp) {
-        Optional<User> u =getUserById(userID);
+    public boolean createDialogue(String userID, String convID, String dialogueID, String prompt, long timestamp) {
+        Optional<User> u = getUserById(userID);
         if (u.isPresent()) {
             User user = u.get();
-            Optional<List<Conversation>> conv = user.addDialogue(convID,new Dialogue(dialogueID, prompt, timestamp));
-            if(conv.isPresent()){
+            Optional<List<Conversation>> conv = user.addDialogue(convID, new Dialogue(dialogueID, prompt, timestamp));
+            if (conv.isPresent()) {
                 List<Conversation> conversations = conv.get();
                 Bson filter = Filters.eq("id", userID);
                 UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
-                if (result.getModifiedCount() == 1){
+                if (result.getModifiedCount() == 1) {
                     return true;
                 }
-            }    
+            }
         }
         return false;
-        }
+    }
 
     @Override
     public boolean addResponse(String userID, String convID, String dialogueID, String response) {
-       Optional<User> u = getUserById(userID);
-       if(u.isPresent()){
-        User user = u.get();
-        Optional<List<Conversation>> conv = user.addResponse(convID, dialogueID, response);
-        if(conv.isPresent()){
-            List<Conversation> conversations = conv.get();
-            Bson filter = Filters.eq("id",userID);
-            UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
-            if (result.getModifiedCount() == 1){
-                return true;
+        Optional<User> u = getUserById(userID);
+        if (u.isPresent()) {
+            User user = u.get();
+            Optional<List<Conversation>> conv = user.addResponse(convID, dialogueID, response);
+            if (conv.isPresent()) {
+                List<Conversation> conversations = conv.get();
+                Bson filter = Filters.eq("id", userID);
+                UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+                if (result.getModifiedCount() == 1) {
+                    return true;
+                }
             }
         }
-       }
-       return false;
+        return false;
     }
-    }
-
+}

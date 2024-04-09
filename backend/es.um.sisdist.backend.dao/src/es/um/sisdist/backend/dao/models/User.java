@@ -173,8 +173,9 @@ public class User {
 
             if(conv.isPresent()){
                 Conversation c = conv.get();
-                c.addDialogos(dialogue);
+                c.addDialogue(dialogue);
                 c.setStatus(Conversation.BUSY);
+                c.setNewTimestamp(this.id, dialogue.getTimestamp());
                 int index = conversations.indexOf(c);
                 conversations.set(index, c);
                 return Optional.of(conversations);

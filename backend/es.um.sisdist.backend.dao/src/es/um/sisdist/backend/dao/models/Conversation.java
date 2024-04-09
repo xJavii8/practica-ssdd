@@ -19,14 +19,16 @@ public class Conversation {
     private String nextURL;
     private String endURL;
 
-    public Conversation() {}
+    public Conversation() {
+    }
 
     public Conversation(String userID, String id, String name, int status) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.dialogues = new ArrayList<Dialogue>();
-        this.nextURL = ("/u/" + userID + "/dialogue/" + this.id + "/next/" + String.valueOf(System.currentTimeMillis()));
+        this.nextURL = ("/u/" + userID + "/dialogue/" + this.id + "/next/"
+                + String.valueOf(System.currentTimeMillis()));
         this.endURL = ("/u/" + userID + "/dialogue/" + this.id + "/end");
     }
 
@@ -35,7 +37,8 @@ public class Conversation {
         this.name = name;
         this.status = Conversation.READY;
         this.dialogues = new ArrayList<Dialogue>();
-        this.nextURL = ("/u/" + userID + "/dialogue/" + this.id + "/next/" + String.valueOf(System.currentTimeMillis()));
+        this.nextURL = ("/u/" + userID + "/dialogue/" + this.id + "/next/"
+                + String.valueOf(System.currentTimeMillis()));
         this.endURL = ("/u/" + userID + "/dialogue/" + this.id + "/end");
     }
 
@@ -76,11 +79,11 @@ public class Conversation {
         this.dialogues = dialogues;
     }
 
-    public void addDialogos(Dialogue dialogue) {
+    public void addDialogue(Dialogue dialogue) {
         this.dialogues.add(dialogue);
     }
 
-    public void deleteDialogo(Dialogue dialogue) {
+    public void deleteDialogue(Dialogue dialogue) {
         this.dialogues.remove(dialogue);
     }
 
@@ -99,14 +102,20 @@ public class Conversation {
     public void setEndURL(String end) {
         this.endURL = end;
     }
-    public boolean addResponse(String idDialogue, String response){
+
+    public void setNewTimestamp(String userID, long timestamp) {
+        this.nextURL = ("/u/" + userID + "/dialogue/" + this.id + "/next/"
+                + String.valueOf(timestamp));
+    }
+
+    public boolean addResponse(String idDialogue, String response) {
         Optional<Dialogue> dialogo = dialogues.stream()
-            .filter(dialogue -> idDialogue.equals(dialogue.getId()))
-            .findFirst();
-        if (dialogo.isPresent()){
+                .filter(dialogue -> idDialogue.equals(dialogue.getId()))
+                .findFirst();
+        if (dialogo.isPresent()) {
             Dialogue d = dialogo.get();
             int index = dialogues.indexOf(d);
-            d.setResponse(response);
+            d.setAnswer(response);
             dialogues.set(index, d);
             return true;
         }

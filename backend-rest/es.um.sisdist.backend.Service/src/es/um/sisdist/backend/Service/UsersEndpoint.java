@@ -143,12 +143,16 @@ public class UsersEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendPrompt(PromptDTO pDTO) {
-        Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt());
+        if(impl.isConvReady(pDTO.getUserID(), pDTO.getConvID())) {
+            Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt(), pDTO.getTimestamp());
 
-        if (c.isPresent()) {
-            return Response.status(200).entity(c.get()).build();
+            if (c.isPresent()) {
+                return Response.status(200).entity(c.get()).build();
+            }
+            return Response.status(404).build();
         }
-        return Response.status(404).build();
+
+        return Response.status(Status.NO_CONTENT).build();
     }
 
 }

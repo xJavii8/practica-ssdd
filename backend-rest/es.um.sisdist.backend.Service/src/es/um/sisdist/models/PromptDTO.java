@@ -8,12 +8,13 @@ public class PromptDTO {
     private String userID;
     private String convID;
     private String prompt;
+    private long timestamp;
     private ConvDTO conversation;
 
     public PromptDTO() {
     }
 
-    public PromptDTO(String userID, String convID, String prompt) {
+    public PromptDTO(String userID, String convID, String prompt, long timestamp) {
         this.userID = userID;
         this.convID = convID;
         this.prompt = prompt;
@@ -45,6 +46,14 @@ public class PromptDTO {
 
     public void setConvID(String convID) {
         this.convID = convID;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public ConvDTO getConversation() {

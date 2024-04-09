@@ -173,14 +173,25 @@ public class AppLogicImpl {
         return Optional.empty();
     }
 
-    public Optional<Conversation> sendPrompt(String userID, String convID, String prompt) {
+    public boolean isConvReady(String userID, String convID) {
+        Optional<Conversation> c = dao.getConvByID(userID, convID);
+        if(c.isPresent()) {
+            Conversation conv = c.get();
+            if(conv.getStatus() == Conversation.READY) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Optional<Conversation> sendPrompt(String userID, String convID, String prompt, long timestamp) {
         POSTRequest req1 = POSTRequest.newBuilder().setPrompt(prompt).build();
         POSTResponse resp1;
 
         try {
             resp1 = blockingStub.promptPOST(req1);
-            dao.createDialogue(userID, convID, resp1.getLocalization().split("/")[2], prompt,
-                    new Date(System.currentTimeMillis()));
+            dao.createDialogue(userID, convID, resp1.getLocalization().split("/")[2], prompt, timestamp);
             GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(convID)
                     .setIdUser(userID).build();
 
