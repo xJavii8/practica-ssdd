@@ -8,19 +8,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Logger;
+
+import org.bson.Document;
 
 import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
 import es.um.sisdist.backend.grpc.PingRequest;
 import es.um.sisdist.backend.grpc.PingResponse;
 import es.um.sisdist.backend.grpc.POSTRequest;
 import es.um.sisdist.backend.grpc.POSTResponse;
-import es.um.sisdist.backend.dao.models.Conversation;
-import es.um.sisdist.backend.dao.models.Dialogue;
-import es.um.sisdist.backend.dao.user.IUserDAO;
-import es.um.sisdist.backend.dao.user.MongoConvDAO;
-import es.um.sisdist.backend.dao.user.MongoDialogueDAO;
 import es.um.sisdist.backend.dao.user.MongoUserDAO;
 import es.um.sisdist.backend.grpc.GETRequest;
 import es.um.sisdist.backend.grpc.GETResponse;
@@ -101,7 +97,6 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 		try {
 			StringBuffer response = new StringBuffer();
 			String idDialogo = request.getAnswerURL().split("/")[2];
-			logger.info(idDialogo);
 			
 			URL url = new URL("http://llamachat:5020" + request.getAnswerURL());
 			new InnerGrpcServiceImplToLlama(url,request.getIdUser(),idDialogo,request.getIdConversation()).run();
@@ -113,56 +108,6 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 			e.printStackTrace();
 		}
 	}
-
-
-/*
-	@Override
-	public void storeImage(ImageData request, StreamObserver<Empty> responseObserver)
-    {
-		logger.info("Add image " + request.getId());
-    	imageMap.put(request.getId(),request);
-    	responseObserver.onNext(Empty.newBuilder().build());
-    	responseObserver.onCompleted();
-	}
-
-	@Override
-	public StreamObserver<ImageData> storeImages(StreamObserver<Empty> responseObserver) 
-	{
-		// La respuesta, sólo un objeto Empty
-		responseObserver.onNext(Empty.newBuilder().build());
-
-		// Se retorna un objeto que, al ser llamado en onNext() con cada
-		// elemento enviado por el cliente, reacciona correctamente
-		return new StreamObserver<ImageData>() {
-			@Override
-			public void onCompleted() {
-				// Terminar la respuesta.
-				responseObserver.onCompleted();
-			}
-			@Override
-			public void onError(Throwable arg0) {
-			}
-			@Override
-			public void onNext(ImageData imagedata) 
-			{
-				logger.info("Add image (multiple) " + imagedata.getId());
-		    	imageMap.put(imagedata.getId(), imagedata);	
-			}
-		};
-	}
-
-	@Override
-	public void obtainImage(ImageSpec request, StreamObserver<ImageData> responseObserver) {
-		// TODO Auto-generated method stub
-		super.obtainImage(request, responseObserver);
-	}
-
-	@Override
-	public StreamObserver<ImageSpec> obtainCollage(StreamObserver<ImageData> responseObserver) {
-		// TODO Auto-generated method stub
-		return super.obtainCollage(responseObserver);
-	}
-	*/
 }
 
 
@@ -212,7 +157,10 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 			
 			}
 		}
-		userDAO.addResponse(idUser, idConv, idDialogo, response.toString());
+
+		Document doc = Document.parse(response.toString());
+		String answer = doc.getString("answer");
+		userDAO.addResponse(idUser, idConv, idDialogo, answer);
 	}
 
 

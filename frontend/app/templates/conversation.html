@@ -33,4 +33,11 @@
 
 <script src="{{ url_for('static', filename='scripts/conversation.js') }}"></script>
 
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        const messages = {{ dialogues|tojson }};
+        loadMessages(messages);
+    });
+</script>
+
 {% endblock %}

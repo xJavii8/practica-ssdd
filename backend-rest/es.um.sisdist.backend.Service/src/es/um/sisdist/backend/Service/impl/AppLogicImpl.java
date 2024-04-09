@@ -33,8 +33,6 @@ import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.user.IUserDAO;
-import es.um.sisdist.backend.dao.user.MongoConvDAO;
-import es.um.sisdist.backend.dao.user.MongoDialogueDAO;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -46,8 +44,6 @@ import io.grpc.StatusRuntimeException;
 public class AppLogicImpl {
     IDAOFactory daoFactory;
     IUserDAO dao;
-    MongoDialogueDAO diaDAO = new MongoDialogueDAO();
-    MongoConvDAO convDAO = new MongoConvDAO();
 
     private static final Logger logger = Logger.getLogger(AppLogicImpl.class.getName());
     private static final SecureRandom secureRandom = new SecureRandom(); // threadsafe
@@ -139,9 +135,9 @@ public class AppLogicImpl {
 
     public Optional<Conversation> createConversation(String userID, String name) {
         boolean convExists = dao.checkIfConvExists(userID, name);
-        if(convExists == false) {
+        if (convExists == false) {
             Optional<Conversation> c = dao.createConversation(userID, name);
-            if(!c.isPresent()) {
+            if (!c.isPresent()) {
                 return Optional.empty();
             }
 
@@ -153,11 +149,12 @@ public class AppLogicImpl {
 
     public Optional<List<ConversationSummary>> getConversations(String userID) {
         Optional<User> u = dao.getUserById(userID);
-        if(u.isPresent()) {
+        if (u.isPresent()) {
             User user = u.get();
             return Optional.of(user.getConversations().stream()
-                   .map(conversation -> new ConversationSummary(conversation.getName(), conversation.getStatus(), conversation.getID()))
-                   .collect(Collectors.toList()));
+                    .map(conversation -> new ConversationSummary(conversation.getName(), conversation.getStatus(),
+                            conversation.getID()))
+                    .collect(Collectors.toList()));
         }
 
         return Optional.empty();
@@ -169,39 +166,29 @@ public class AppLogicImpl {
 
     public Optional<Conversation> getConversationData(String userID, String convID) {
         Optional<Conversation> c = dao.getConvByID(userID, convID);
-        if(c.isPresent()) {
+        if (c.isPresent()) {
             return c;
         }
 
         return Optional.empty();
     }
-    
+
     public Optional<Conversation> sendPrompt(String userID, String convID, String prompt) {
-
-        logger.info("CONVID: " + convID);
-        logger.info("PROMPT: " + prompt);
-
         POSTRequest req1 = POSTRequest.newBuilder().setPrompt(prompt).build();
         POSTResponse resp1;
 
-        GETResponse resp2;
-        String answer = "";
-        
         try {
             resp1 = blockingStub.promptPOST(req1);
+            dao.createDialogue(userID, convID, resp1.getLocalization().split("/")[2], prompt,
+                    new Date(System.currentTimeMillis()));
+            GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(convID)
+                    .setIdUser(userID).build();
 
-            logger.info("RESPUESTA POST: " + resp1.getLocalization());
-            
-            //Dialogue d = diaDAO.createDialogue(resp1.getLocalization().split("/")[2], null, prompt, new Date(time)).get();
-            dao.createDialogue(userID, convID,resp1.getLocalization().split("/")[2] , prompt, new Date(System.currentTimeMillis()));
-            GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(convID).setIdUser(userID).build();
+            blockingStub.promptGET(req2);
 
-            resp2 = blockingStub.promptGET(req2);
-
-            logger.info("ID Dialogo: " + resp2.getAnswerText());
-            
         } catch (StatusRuntimeException e) {
             return Optional.empty();
+
         }
 
         return dao.getConvByID(userID, convID);
@@ -210,7 +197,7 @@ public class AppLogicImpl {
     public Optional<User> modifyUser(String actualEmail, String newMail, String name, String password) {
         Optional<User> u = dao.getUserByEmail(actualEmail);
         if (u.isPresent()) {
-            return dao.modifyUser(u.get().getId(),actualEmail, newMail, name, password);
+            return dao.modifyUser(u.get().getId(), actualEmail, newMail, name, password);
         }
         return Optional.empty();
     }

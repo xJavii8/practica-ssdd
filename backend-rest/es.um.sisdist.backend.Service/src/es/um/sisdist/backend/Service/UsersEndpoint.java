@@ -91,7 +91,7 @@ public class UsersEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createConv(@PathParam("id") String id, ConvDTO cDTO) {
-        
+
         Optional<Conversation> conv = impl.createConversation(id, cDTO.getConvName());
         if (!conv.isPresent()) {
             return Response.status(Status.NO_CONTENT).build();
@@ -107,7 +107,7 @@ public class UsersEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public AllConvsDTO getConvs(@PathParam("id") String id) {
-        
+
         Optional<List<ConversationSummary>> conv = impl.getConversations(id);
         if (!conv.isPresent()) {
             return new AllConvsDTO();
@@ -121,7 +121,7 @@ public class UsersEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ConvDTO getConvData(@PathParam("id") String id, @PathParam("convID") String convID) {
-        
+
         Optional<Conversation> c = impl.getConversationData(id, convID);
         if (!c.isPresent()) {
             return new ConvDTO();
@@ -134,7 +134,7 @@ public class UsersEndpoint {
     @Path("{id}/dialogue/{convID}/end")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public boolean endConversation(@PathParam("id") String id, @PathParam("convID") String convID) {     
+    public boolean endConversation(@PathParam("id") String id, @PathParam("convID") String convID) {
         return impl.endConversation(id, convID);
     }
 
@@ -144,13 +144,11 @@ public class UsersEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendPrompt(PromptDTO pDTO) {
         Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt());
-        
-        if(c.isPresent()){
-        return Response.status(200).build();
+
+        if (c.isPresent()) {
+            return Response.status(200).entity(c.get()).build();
         }
         return Response.status(404).build();
     }
-
-    
 
 }
