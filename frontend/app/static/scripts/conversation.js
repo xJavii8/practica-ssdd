@@ -29,7 +29,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 return response.json();
             })
             .then(data => {
-                addMessage('model', data.modelResponse);
+                const lastDialogue = data.dialogues[data.dialogues.length - 1]
+                addMessage('model', lastDialogue.response);
             })
             .catch(error => {
                 console.error("Error:", error);
@@ -80,29 +81,40 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('cancelEnd').addEventListener('click', function() {
         document.getElementById('confirmationDialog').style.display = 'none';
     });
-
-    function addMessage(sender, text) {
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message', `${sender}-message`);
-    
-        const imgDiv = document.createElement('div');
-        imgDiv.classList.add('image');
-        imgDiv.style.backgroundImage = sender === 'user' ? "url('/static/images/userIcon.png')" : "url('/static/mainIcon.webp')";
-    
-        const textDiv = document.createElement('div');
-        textDiv.classList.add('text');
-        textDiv.textContent = text;
-    
-        if (sender === 'model') {
-            messageDiv.appendChild(imgDiv);
-            messageDiv.appendChild(textDiv);
-        } else {
-            messageDiv.appendChild(textDiv);
-            messageDiv.appendChild(imgDiv);
-        }
-    
-        chatArea.appendChild(messageDiv);
-        chatArea.scrollTop = chatArea.scrollHeight;
-    }
     
 });
+
+function addMessage(sender, text) {
+    const chatArea = document.getElementById('chatArea');
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', `${sender}-message`);
+
+    const imgDiv = document.createElement('div');
+    imgDiv.classList.add('image');
+    imgDiv.style.backgroundImage = sender === 'user' ? "url('/static/images/userIcon.png')" : "url('/static/mainIcon.webp')";
+
+    const textDiv = document.createElement('div');
+    textDiv.classList.add('text');
+    textDiv.textContent = text;
+
+    if (sender === 'model') {
+        messageDiv.appendChild(imgDiv);
+        messageDiv.appendChild(textDiv);
+    } else {
+        messageDiv.appendChild(textDiv);
+        messageDiv.appendChild(imgDiv);
+    }
+
+    chatArea.appendChild(messageDiv);
+    chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function loadMessages(dialogues) {
+    dialogues.forEach(dialogue => {
+        console.log("DIALOGUE: " + dialogue);
+        console.log("DIALOGUE PROMPT: " + dialogue.prompt);
+        console.log("DIALOGUE RESPONSE: " + dialogue.response);
+        addMessage('user', dialogue.prompt);
+        addMessage('model', dialogue.response);
+    });
+}

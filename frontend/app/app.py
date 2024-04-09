@@ -133,11 +133,14 @@ def conversation():
     userID = str(format(current_user.id, '032x'))
     convName = session['convName']
     convID = session['convID']
+    dialogues = session.get('messages', None)
+    logging.info(session)
+    logging.info("DIALOGUES: " + str(dialogues))
     if not convName:
         flash("Esta conversación no existe.", "danger")
         return redirect(url_for('index'))
     else:
-        return render_template('conversation.html', active_page='conversation', convName=convName, convID=convID)
+        return render_template('conversation.html', active_page='conversation', convName=convName, convID=convID, dialogues=dialogues)
 
 @app.route('/endConv', methods=['POST'])
 @login_required
@@ -164,8 +167,8 @@ def sendPrompt():
     sendPromptPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service{nextURL}', json=json)
     logging.info("STATUS CODE: " + str(sendPromptPOST.status_code))
     if sendPromptPOST.status_code == 200:
-       logging.info("OK")
-    return None
+       logging.info(sendPromptPOST.json())
+       return sendPromptPOST.json()
 
 
 @app.route('/getConvData', methods=['POST'])
@@ -181,6 +184,7 @@ def getConvData():
         session['convName'] = getConvDataGET.json().get('convName')
         session['next'] = getConvDataGET.json().get('nextURL')
         session['end'] = getConvDataGET.json().get('endURL')
+        session['messages'] = getConvDataGET.json().get('dialogues')
         return jsonify({"status": "ok"}), 200
     else:
         resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
