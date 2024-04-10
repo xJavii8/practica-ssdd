@@ -6,20 +6,20 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class AllConvsDTO {
-    private List<ConversationSummary> allConvs;
+    private List<ConversationSummaryDTO> allConvs;
 
     public AllConvsDTO() {
     }
 
-    public AllConvsDTO(List<ConversationSummary> convs) {
+    public AllConvsDTO(List<ConversationSummaryDTO> convs) {
         this.allConvs = convs;
     }
 
-    public List<ConversationSummary> getAllConvs() {
+    public List<ConversationSummaryDTO> getAllConvs() {
         return allConvs;
     }
 
-    public void setAllConvs(List<ConversationSummary> allConvs) {
+    public void setAllConvs(List<ConversationSummaryDTO> allConvs) {
         this.allConvs = allConvs;
     }
 

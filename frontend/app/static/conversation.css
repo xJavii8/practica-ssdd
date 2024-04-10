@@ -89,4 +89,13 @@
     text-align: center;
 }
 
+@keyframes blink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.loading-dots::after {
+    content: '...';
+    animation: blink 1s infinite;
+}
 

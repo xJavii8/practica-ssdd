@@ -265,18 +265,6 @@ public class MongoUserDAO implements IUserDAO {
     }
 
     @Override
-    public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllDialogosOfUser'");
-    }
-
-    @Override
-    public Optional<Dialogue> getDialogueFromUser(String userID, String dialogueID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
-    }
-
-    @Override
     public boolean createDialogue(String userID, String convID, String dialogueID, String prompt, long timestamp) {
         Optional<User> u = getUserById(userID);
         if (u.isPresent()) {
@@ -311,4 +299,21 @@ public class MongoUserDAO implements IUserDAO {
         }
         return false;
     }
+
+    @Override
+    public boolean updatePromptCalls(String userID) {
+        Optional<User> u = getUserById(userID);
+        if(u.isPresent()) {
+            User user = u.get();
+            user.updatePromptCalls();
+            Bson filter = Filters.eq("id", userID);
+            UpdateResult result = collection.get().updateOne(filter, Updates.set("promptCalls", user.getPromptCalls()));
+            if (result.getModifiedCount() == 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
 }

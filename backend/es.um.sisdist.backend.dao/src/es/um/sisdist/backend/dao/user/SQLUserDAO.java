@@ -113,7 +113,7 @@ public class SQLUserDAO implements IUserDAO {
                     result.getString(3), // pwhash
                     result.getString(4), // name
                     result.getString(5), // token
-                    result.getInt(6))); // visits
+                    result.getInt(6))); // promptCalls
         } catch (SQLException e) {
             return Optional.empty();
         }
@@ -152,18 +152,6 @@ public class SQLUserDAO implements IUserDAO {
     public Optional<Conversation> createConversation(String userID, String convName) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'createConversation'");
-    }
-
-    @Override
-    public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllDialogosOfUser'");
-    }
-
-    @Override
-    public Optional<Dialogue> getDialogueFromUser(String userID, String dialogueID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
     }
 
     @Override
@@ -206,6 +194,12 @@ public class SQLUserDAO implements IUserDAO {
     public boolean delAllConvs(String userID) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'delAllConvs'");
+    }
+
+    @Override
+    public boolean updatePromptCalls(String userID) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updatePromptCalls'");
     }
 
 }

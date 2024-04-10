@@ -16,10 +16,11 @@ import es.um.sisdist.models.AllConvsDTOUtils;
 import es.um.sisdist.models.ChangeUserInfoDTO;
 import es.um.sisdist.models.ConvDTO;
 import es.um.sisdist.models.ConvDTOUtils;
-import es.um.sisdist.models.ConversationSummary;
+import es.um.sisdist.models.ConversationSummaryDTO;
 import es.um.sisdist.models.PromptDTO;
 import es.um.sisdist.models.UserDTO;
 import es.um.sisdist.models.UserDTOUtils;
+import es.um.sisdist.models.UserStatsDTO;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -108,12 +109,26 @@ public class UsersEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public AllConvsDTO getConvs(@PathParam("id") String id) {
 
-        Optional<List<ConversationSummary>> conv = impl.getConversations(id);
+        Optional<List<ConversationSummaryDTO>> conv = impl.getConversations(id);
         if (!conv.isPresent()) {
             return new AllConvsDTO();
         }
 
         return AllConvsDTOUtils.toDTO(conv.get());
+    }
+
+    @GET
+    @Path("{id}/stats")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public UserStatsDTO getUserStats(@PathParam("id") String id) {
+
+        Optional<UserStatsDTO> stats = impl.getUserStats(id);
+        if (stats.isPresent()) {
+            return stats.get();
+        }
+
+        return new UserStatsDTO();
     }
 
     @GET

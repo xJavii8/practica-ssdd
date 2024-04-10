@@ -17,7 +17,7 @@ public class User {
 
     private String token;
 
-    private int visits;
+    private int promptCalls;
 
     private List<Conversation> conversations;
 
@@ -92,17 +92,17 @@ public class User {
     }
 
     /**
-     * @return the visits
+     * @return the promptCalls
      */
-    public int getVisits() {
-        return visits;
+    public int getPromptCalls() {
+        return promptCalls;
     }
 
     /**
-     * @param visits the visits to set
+     * @param promptCalls the promptCalls to set
      */
-    public void setVisits(final int visits) {
-        this.visits = visits;
+    public void setPromptCalls(int promptCalls) {
+        this.promptCalls = promptCalls;
     }
 
     /**
@@ -121,25 +121,29 @@ public class User {
         this.conversations = conversations;
     }
 
-    public User(String email, String password_hash, String name, String tOKEN, int visits) {
-        this(email, email, password_hash, name, tOKEN, visits);
+    public void updatePromptCalls() {
+        this.promptCalls = (promptCalls + 1);
+    }
+
+    public User(String email, String password_hash, String name, String tOKEN, int promptCalls) {
+        this(email, email, password_hash, name, tOKEN, promptCalls);
         this.id = UserUtils.md5pass(email);
     }
 
-    public User(String id, String email, String password_hash, String name, String tOKEN, int visits) {
+    public User(String id, String email, String password_hash, String name, String tOKEN, int promptCalls) {
         this.id = id;
         this.email = email;
         this.password_hash = password_hash;
         this.name = name;
         token = tOKEN;
-        this.visits = visits;
+        this.promptCalls = promptCalls;
         this.conversations = new ArrayList<Conversation>();
     }
 
     @Override
     public String toString() {
         return "User [id=" + id + ", email=" + email + ", password_hash=" + password_hash + ", name=" + name
-                + ", TOKEN=" + token + ", visits=" + visits + "]";
+                + ", TOKEN=" + token + ", promptCalls=" + promptCalls + "]";
     }
 
     public User() {

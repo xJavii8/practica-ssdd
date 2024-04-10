@@ -36,9 +36,7 @@ public interface IUserDAO
     public boolean createDialogue(String userID, String convID, String dialogueID,  String prompt, long timestamp);
 
     public boolean addResponse(String userID, String convID, String dialogueID, String response);
-
-    public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID);
-
-    public Optional<Dialogue> getDialogueFromUser(String userID, String dialogueID);
+    
+    public boolean updatePromptCalls(String userID);
 
 }

@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const userText = userInput.value.trim();
         if (userText !== '') {
             addMessage('user', userText);
+            addMessage('model', '...');
 
             fetch('/sendPrompt', {
                 method: 'POST',
@@ -22,6 +23,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: JSON.stringify({ prompt: userText })
             })
             .then(response => {
+                const existingLoadingMessage = document.getElementById('loadingMessage');
+                if(existingLoadingMessage) {
+                    existingLoadingMessage.remove();
+                }
 
                 if(response.status === 204) {
                     console.log("No se puede mandar un mensaje mientras está en BUSY o FINISHED");
@@ -83,6 +88,11 @@ document.addEventListener("DOMContentLoaded", function() {
             window.location.href = '/';
         })
         .catch(error => {
+            const existingLoadingMessage = document.getElementById('loadingMessage');
+            if(existingLoadingMessage) {
+                existingLoadingMessage.remove();
+            }
+
             console.error('Error:', error);
         });
 
@@ -107,6 +117,14 @@ function addMessage(sender, text) {
 
     const textDiv = document.createElement('div');
     textDiv.classList.add('text');
+    if(text === "..." && sender === 'model') {
+        const existingLoadingMessage = document.getElementById('loadingMessage');
+        if(existingLoadingMessage) {
+            existingLoadingMessage.remove();
+        }
+        messageDiv.id = 'loadingMessage';
+        textDiv.classList.add('loading-dots');
+    }
     textDiv.textContent = text;
 
     if (sender === 'model') {

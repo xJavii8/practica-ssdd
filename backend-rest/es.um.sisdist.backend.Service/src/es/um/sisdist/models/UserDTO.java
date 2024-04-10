@@ -12,7 +12,7 @@ public class UserDTO
 
     private String token;
 
-    private int visits;
+    private int promptCalls;
 
     /**
      * @return the id
@@ -95,22 +95,22 @@ public class UserDTO
     }
 
     /**
-     * @return the visits
+     * @return the promptCalls
      */
-    public int getVisits()
+    public int getPromptCalls()
     {
-        return visits;
+        return promptCalls;
     }
 
     /**
-     * @param visits the visits to set
+     * @param promptCalls the promptCalls to set
      */
-    public void setVisits(int visits)
+    public void setPromptCalls(int promptCalls)
     {
-        this.visits = visits;
+        this.promptCalls = promptCalls;
     }
 
-    public UserDTO(String id, String email, String password, String name, String tOKEN, int visits)
+    public UserDTO(String id, String email, String password, String name, String tOKEN, int promptCalls)
     {
         super();
         this.id = id;
@@ -118,7 +118,7 @@ public class UserDTO
         this.password = password;
         this.name = name;
         token = tOKEN;
-        this.visits = visits;
+        this.promptCalls = promptCalls;
     }
 
     public UserDTO()

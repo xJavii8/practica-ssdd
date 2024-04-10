@@ -23,9 +23,10 @@ import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
 import es.um.sisdist.backend.grpc.POSTRequest;
 import es.um.sisdist.backend.grpc.POSTResponse;
 import es.um.sisdist.backend.grpc.PingRequest;
-import es.um.sisdist.models.ConversationSummary;
+import es.um.sisdist.models.ConversationSummaryDTO;
 import es.um.sisdist.models.UserDTO;
 import es.um.sisdist.models.UserDTOUtils;
+import es.um.sisdist.models.UserStatsDTO;
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
 import es.um.sisdist.backend.dao.IDAOFactory;
 import es.um.sisdist.backend.dao.models.Conversation;
@@ -147,12 +148,24 @@ public class AppLogicImpl {
         return Optional.empty();
     }
 
-    public Optional<List<ConversationSummary>> getConversations(String userID) {
+    public Optional<UserStatsDTO> getUserStats(String userID) {
+        Optional<User> u = dao.getUserById(userID);
+        if(u.isPresent()) {
+            User user = u.get();
+            int numConvs = user.getConversations().size();
+            int promptCalls = user.getPromptCalls();
+            return Optional.of(new UserStatsDTO(numConvs, promptCalls));
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<List<ConversationSummaryDTO>> getConversations(String userID) {
         Optional<User> u = dao.getUserById(userID);
         if (u.isPresent()) {
             User user = u.get();
             return Optional.of(user.getConversations().stream()
-                    .map(conversation -> new ConversationSummary(conversation.getName(), conversation.getStatus(),
+                    .map(conversation -> new ConversationSummaryDTO(conversation.getName(), conversation.getStatus(),
                             conversation.getID()))
                     .collect(Collectors.toList()));
         }
@@ -194,6 +207,7 @@ public class AppLogicImpl {
     }
 
     public Optional<Conversation> sendPrompt(String userID, String convID, String prompt, long timestamp) {
+        dao.updatePromptCalls(userID);
         POSTRequest req1 = POSTRequest.newBuilder().setPrompt(prompt).build();
         POSTResponse resp1;
 

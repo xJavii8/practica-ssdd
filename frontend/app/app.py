@@ -95,6 +95,7 @@ def register():
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+    userID = str(format(current_user.id, '032x'))
     form = ChangeUserForm(None if request.method != 'POST' else request.form)
     if request.method == "POST" and form.validate():
         changeUserInfoData = {"actualEmail": form.actualEmail.data, "newMail": form.newMail.data, "name": form.name.data, "password": form.newPassword.data}
@@ -110,7 +111,16 @@ def profile():
             return redirect(url_for('profile'))
         else:
             flash('Ha ocurrido un error. Inténtalo de nuevo', 'danger')
-    return render_template('profile.html', form=form, active_page='profile')
+    getUserStatsGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/stats')
+    numConvs = 0
+    promptCalls = 0
+    if getUserStatsGET.status_code == 200:
+        statsJSON = getUserStatsGET.json()
+        numConvs = statsJSON.get('numConvs', 0)
+        promptCalls = statsJSON.get('promptCalls', 0)
+    else:
+        flash("Ha ocurrido un error al obtener tus estadísticas. Inténtalo de nuevo", "danger")
+    return render_template('profile.html', form=form, active_page='profile', numConvs=numConvs, promptCalls=promptCalls)
 
 
 @app.route('/deleteUser', methods=['POST'])
