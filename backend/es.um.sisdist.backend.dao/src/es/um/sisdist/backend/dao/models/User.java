@@ -166,31 +166,52 @@ public class User {
 
         return Optional.empty();
     }
-    public Optional<List<Conversation>> addDialogue(String convID, Dialogue dialogue){
-        Optional<Conversation> conv = conversations.stream()
-            .filter(conversations -> convID.equals(conversations.getID()))
-            .findFirst();
 
-            if(conv.isPresent()){
-                Conversation c = conv.get();
-                c.addDialogue(dialogue);
-                c.setStatus(Conversation.BUSY);
-                c.setNewTimestamp(this.id, dialogue.getTimestamp());
-                int index = conversations.indexOf(c);
-                conversations.set(index, c);
-                return Optional.of(conversations);
-            }
-            return Optional.empty();
-    }
-    public Optional<List<Conversation>> addResponse(String convID, String dialogueID, String response){
+    public boolean delConversation(String convID) {
         Optional<Conversation> conv = conversations.stream()
-        .filter(conversations -> convID.equals(conversations.getID()))
-        .findFirst();
+                .filter(conversation -> convID.equals(conversation.getID()))
+                .findFirst();
 
-        if (conv.isPresent()){
+        if (conv.isPresent()) {
             Conversation c = conv.get();
-        
-            if(!c.addResponse(dialogueID, response)){
+            conversations.remove(c);
+            return true;
+        }
+
+        return false;
+    }
+
+    public List<Conversation> delAllConvs() {
+        this.conversations = new ArrayList<Conversation>();
+        return this.conversations;
+    }
+
+    public Optional<List<Conversation>> addDialogue(String convID, Dialogue dialogue) {
+        Optional<Conversation> conv = conversations.stream()
+                .filter(conversations -> convID.equals(conversations.getID()))
+                .findFirst();
+
+        if (conv.isPresent()) {
+            Conversation c = conv.get();
+            c.addDialogue(dialogue);
+            c.setStatus(Conversation.BUSY);
+            c.setNewTimestamp(this.id, dialogue.getTimestamp());
+            int index = conversations.indexOf(c);
+            conversations.set(index, c);
+            return Optional.of(conversations);
+        }
+        return Optional.empty();
+    }
+
+    public Optional<List<Conversation>> addResponse(String convID, String dialogueID, String response) {
+        Optional<Conversation> conv = conversations.stream()
+                .filter(conversations -> convID.equals(conversations.getID()))
+                .findFirst();
+
+        if (conv.isPresent()) {
+            Conversation c = conv.get();
+
+            if (!c.addResponse(dialogueID, response)) {
                 return Optional.empty();
             }
             c.setStatus(Conversation.READY);
@@ -200,5 +221,5 @@ public class User {
         }
         return Optional.empty();
     }
-    
+
 }

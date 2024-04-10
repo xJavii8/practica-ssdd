@@ -29,6 +29,10 @@ public interface IUserDAO
 
     public boolean endConversation(String userID, String convID);
 
+    public boolean delConversation(String userID, String convID);
+
+    public boolean delAllConvs(String userID);
+
     public boolean createDialogue(String userID, String convID, String dialogueID,  String prompt, long timestamp);
 
     public boolean addResponse(String userID, String convID, String dialogueID, String response);

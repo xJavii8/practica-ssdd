@@ -1,68 +1,16 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const chatForm = document.getElementById('chatForm');
-    const userInput = document.getElementById('userInput');
-    const button = document.getElementById('button-addon2');
-
-    button.disabled = true;
-
-    userInput.addEventListener('input', function() {
-        // Si hay texto se habilita el botón, de lo contrario, se deshabilita
-        button.disabled = !this.value.length;
-    });
-
-    chatForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const userText = userInput.value.trim();
-        if (userText !== '') {
-            addMessage('user', userText);
-
-            fetch('/sendPrompt', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: userText })
-            })
-            .then(response => {
-
-                if(response.status === 204) {
-                    console.log("No se puede mandar un mensaje mientras está en BUSY o FINISHED");
-                    return {status: 204};
-                }
-
-                if (!response.ok) {
-                    throw new Error('Error al enviar el mensaje');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if(data.status === 204) {
-                    window.location.reload();
-                    console.log("No se puede mandar un mensaje mientras está en BUSY o FINISHED");
-                } else if(data.dialogues && data.dialogues.length > 0) {
-                    const lastDialogue = data.dialogues[data.dialogues.length - 1];
-                    addMessage('model', lastDialogue.answer);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-
-            userInput.value = '';
-            userInput.focus();
-        }
-    });
-
-    document.getElementById('endConversation').addEventListener('click', function() {
+    document.getElementById('delConversation').addEventListener('click', function() {
         document.getElementById('confirmationDialog').style.display = 'flex'; // Diálogo de confirmación para terminar la conver
     });
 
     // Finalización de conversación
-    document.getElementById('confirmEnd').addEventListener('click', function() {
+    document.getElementById('confirmDel').addEventListener('click', function() {
         const dialogContainer = document.getElementById('confirmationDialog');
         const convID = dialogContainer.getAttribute('data-convID');
 
         // Solicitud backend
-        fetch('/endConv', {
-            method: 'POST',
+        fetch('/delConv', {
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -72,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Algo salió mal al finalizar la conversación.');
+                throw new Error('Algo salió mal al eliminar la conversación.');
             }
             return response.json();
         })
@@ -80,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("DATA: ");
             console.log(data);
             console.log(data.message);
-            window.location.href = '/';
+            window.location.href = '/allConversations';
         })
         .catch(error => {
             console.error('Error:', error);
@@ -90,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Cancelación de finalización
-    document.getElementById('cancelEnd').addEventListener('click', function() {
+    document.getElementById('cancelDel').addEventListener('click', function() {
         document.getElementById('confirmationDialog').style.display = 'none';
     });
     

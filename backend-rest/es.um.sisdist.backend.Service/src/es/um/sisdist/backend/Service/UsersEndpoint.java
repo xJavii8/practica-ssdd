@@ -138,6 +138,22 @@ public class UsersEndpoint {
         return impl.endConversation(id, convID);
     }
 
+    @DELETE
+    @Path("{id}/dialogue/{convID}/del")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean delConversation(@PathParam("id") String id, @PathParam("convID") String convID) {
+        return impl.delConversation(id, convID);
+    }
+
+    @DELETE
+    @Path("{id}/delAllConvs")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean dellAllConvs(@PathParam("id") String id) {
+        return impl.delAllConvs(id);
+    }
+
     @POST
     @Path("{id}/dialogue/{convID}/next/{timestamp}")
     @Consumes(MediaType.APPLICATION_JSON)

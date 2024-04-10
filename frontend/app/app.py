@@ -139,6 +139,21 @@ def conversation():
     else:
         return render_template('conversation.html', active_page='conversation', convName=convName, convID=convID, dialogues=dialogues)
 
+
+@app.route('/conversationLog', methods=['GET', 'POST'])
+@login_required
+def conversationLog():
+    convName = session['convName']
+    convID = session['convID']
+    dialogues = session.get('messages', None)
+    logging.info("DIALOGUES: " + str(dialogues))
+    if not convName or not convID:
+        flash("Esta conversación no existe.", "danger")
+        return redirect(url_for('index'))
+    else:
+        return render_template('conversationLog.html', active_page='conversationLog', convName=convName, convID=convID, dialogues=dialogues)
+
+
 @app.route('/endConv', methods=['POST'])
 @login_required
 def endConversation():
@@ -151,6 +166,34 @@ def endConversation():
         resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
         return resp
     
+
+@app.route('/delConv', methods=['DELETE'])
+@login_required
+def delConversation():
+    userID = str(format(current_user.id, '032x'))
+    convID = request.json.get('convID')
+    delConvDEL = requests.delete(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}/del')
+    logging.info(delConvDEL.status_code)
+    if delConvDEL.status_code == 200:
+        return jsonify({"status": "ok"}), 200
+    else:
+        resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
+        return resp
+    
+
+@app.route('/delAllConvs', methods=['DELETE'])
+@login_required
+def delAllConvs():
+    userID = str(format(current_user.id, '032x'))
+    delAllConvsDEL = requests.delete(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/delAllConvs')
+    logging.info(delAllConvsDEL.status_code)
+    if delAllConvsDEL.status_code == 200:
+        return jsonify({"status": "ok"}), 200
+    else:
+        resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
+        return resp
+    
+
 @app.route('/sendPrompt', methods=['POST'])
 @login_required
 def sendPrompt():
@@ -181,8 +224,8 @@ def getConvData():
         session['next'] = getConvDataGET.json().get('nextURL')
         session['end'] = getConvDataGET.json().get('endURL')
         session['messages'] = getConvDataGET.json().get('dialogues')
-        logging.info(session['messages'])
-        return jsonify({"status": "ok"}), 200
+        logging.info(getConvDataGET.json())
+        return jsonify({"status": getConvDataGET.json().get('status')}), 200
     else:
         resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
         return resp

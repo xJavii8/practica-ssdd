@@ -164,6 +164,14 @@ public class AppLogicImpl {
         return dao.endConversation(userID, convID);
     }
 
+    public boolean delConversation(String userID, String convID) {
+        return dao.delConversation(userID, convID);
+    }
+
+    public boolean delAllConvs(String userID) {
+        return dao.delAllConvs(userID);
+    }
+
     public Optional<Conversation> getConversationData(String userID, String convID) {
         Optional<Conversation> c = dao.getConvByID(userID, convID);
         if (c.isPresent()) {

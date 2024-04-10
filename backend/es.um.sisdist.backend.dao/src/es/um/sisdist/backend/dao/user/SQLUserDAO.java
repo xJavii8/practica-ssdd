@@ -196,4 +196,16 @@ public class SQLUserDAO implements IUserDAO {
         throw new UnsupportedOperationException("Unimplemented method 'addResponse'");
     }
 
+    @Override
+    public boolean delConversation(String userID, String convID) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'delConversation'");
+    }
+
+    @Override
+    public boolean delAllConvs(String userID) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'delAllConvs'");
+    }
+
 }
