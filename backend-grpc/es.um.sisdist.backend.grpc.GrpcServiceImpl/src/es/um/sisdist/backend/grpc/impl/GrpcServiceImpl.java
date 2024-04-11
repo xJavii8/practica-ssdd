@@ -7,8 +7,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.bson.Document;
@@ -18,25 +17,23 @@ import es.um.sisdist.backend.grpc.PingRequest;
 import es.um.sisdist.backend.grpc.PingResponse;
 import es.um.sisdist.backend.grpc.POSTRequest;
 import es.um.sisdist.backend.grpc.POSTResponse;
-import es.um.sisdist.backend.dao.user.MongoUserDAO;
+import es.um.sisdist.backend.dao.IDAOFactory;
+import es.um.sisdist.backend.dao.DAOFactoryImpl;
+import es.um.sisdist.backend.dao.user.IUserDAO;
 import es.um.sisdist.backend.grpc.GETRequest;
 import es.um.sisdist.backend.grpc.GETResponse;
 import io.grpc.stub.StreamObserver;
 
-class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase 
-{
+class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase {
 	private Logger logger;
 
-	
-    public GrpcServiceImpl(Logger logger) 
-    {
+	public GrpcServiceImpl(Logger logger) {
 		super();
 		this.logger = logger;
 	}
 
 	@Override
-	public void ping(PingRequest request, StreamObserver<PingResponse> responseObserver) 
-	{
+	public void ping(PingRequest request, StreamObserver<PingResponse> responseObserver) {
 		logger.info("Recived PING request, value = " + request.getV());
 		responseObserver.onNext(PingResponse.newBuilder().setV(request.getV()).build());
 		responseObserver.onCompleted();
@@ -57,24 +54,13 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 			Document doc = new Document("prompt", request.getPrompt());
 			String json = doc.toJson();
 
-			logger.info(json);
-
 			try (OutputStream os = connection.getOutputStream()) {
 				byte[] input = json.getBytes("utf-8");
 				os.write(input, 0, input.length);
 			}
 
 			int responseCode = connection.getResponseCode();
-			logger.info("Response Code: " + responseCode);
-
-			Map<String, List<String>> headerFields = connection.getHeaderFields();
-
-            // Imprimir todos los headers
-            for (Map.Entry<String, List<String>> entry : headerFields.entrySet()) {
-                String key = entry.getKey();
-                List<String> value = entry.getValue();
-                System.out.println("Key: " + key + " Value: " + value);
-            }
+			logger.info("POST realizado.\nPrompt: " + json + "\nRespuesta: " + responseCode);
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String inputLine;
@@ -85,91 +71,96 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase
 			}
 			in.close();
 
-			logger.info(response.toString());
-
-			POSTResponse resp = POSTResponse.newBuilder().setLocalization(connection.getHeaderField("Location")).build();
+			POSTResponse resp = POSTResponse.newBuilder().setLocalization(connection.getHeaderField("Location"))
+					.build();
 			responseObserver.onNext(resp);
 			responseObserver.onCompleted();
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void promptGET(GETRequest request, StreamObserver<GETResponse> responseObserver) 
-	{
+	public void promptGET(GETRequest request, StreamObserver<GETResponse> responseObserver) {
 		try {
-			StringBuffer response = new StringBuffer();
-			String idDialogo = request.getAnswerURL().split("/")[2];
-			
+			String locationID = request.getAnswerURL().split("/")[2];
 			URL url = new URL("http://llamachat:5020" + request.getAnswerURL());
-			new InnerGrpcServiceImplToLlama(url,request.getIdUser(),idDialogo,request.getIdConversation()).run();
-			GETResponse resp = GETResponse.newBuilder().setAnswerText(idDialogo).build();
+			new InnerGrpcServiceImplToLlama(url, request.getIdUser(), locationID, request.getIdConversation()).run();
+			GETResponse resp = GETResponse.newBuilder().setAnswerText(locationID).build();
 			responseObserver.onNext(resp);
 			responseObserver.onCompleted();
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 }
 
+class InnerGrpcServiceImplToLlama extends Thread {
+	private URL url;
+	private String locationID;
+	private String convID;
+	private String userID;
+	IDAOFactory daoFactory;
+	IUserDAO dao;
 
- class InnerGrpcServiceImplToLlama extends Thread{
-	private URL urlLlamachat;
-	private String idDialogo;
-	private String idConv;
-	private String idUser;
-	MongoUserDAO userDAO = new MongoUserDAO();
-	public InnerGrpcServiceImplToLlama(URL connection, String idUser, String idDialogo, String idConv) {
-		this.urlLlamachat = connection;
-		this.idUser= idUser;
-		this.idDialogo = idDialogo;
-		this.idConv = idConv;
+	public InnerGrpcServiceImplToLlama(URL connection, String userID, String locationID, String convID) {
+		this.url = connection;
+		this.userID = userID;
+		this.locationID = locationID;
+		this.convID = convID;
+
+		daoFactory = new DAOFactoryImpl();
+		Optional<String> backend = Optional.ofNullable(System.getenv("DB_BACKEND"));
+
+		if (backend.isPresent() && backend.get().equals("mongo"))
+			dao = daoFactory.createMongoUserDAO();
+		else
+			dao = daoFactory.createSQLUserDAO();
 	}
+
 	@Override
-	public void run(){
+	public void run() {
 		super.run();
 		StringBuffer response = new StringBuffer();
 		HttpURLConnection connection;
 		int responseCode;
-		while(true) {
+		System.out.println("URL: " + url.toString());
+
+		while (true) {
 			try {
-				connection = (HttpURLConnection) urlLlamachat.openConnection();
+				connection = (HttpURLConnection) url.openConnection();
 				connection.setRequestMethod("GET");
 				responseCode = connection.getResponseCode();
-				System.out.println("Response Code: " + responseCode);
-				if(responseCode == 200) {
-					BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-            		String inputLine;
+				System.out.println("GET realizado. Respuesta: " + responseCode);
+
+				if (responseCode == 200) {
+					BufferedReader in = new BufferedReader(
+							new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+
+					String inputLine;
 					while ((inputLine = in.readLine()) != null) {
 						response.append(inputLine);
 					}
+
 					in.close();
-					break;				
-				}else {
-					 sleep(5000);
-					 continue;
+					break;
+				} else {
+					sleep(5000);
+					continue;
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				break;
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-			
 			}
 		}
 
 		Document doc = Document.parse(response.toString());
 		String answer = doc.getString("answer");
-		userDAO.addResponse(idUser, idConv, idDialogo, answer);
+		dao.addResponse(userID, convID, locationID, answer);
 	}
 
-
-
-
-	
 }

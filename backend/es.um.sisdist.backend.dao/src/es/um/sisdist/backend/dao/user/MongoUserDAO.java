@@ -10,17 +10,12 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import static java.util.Arrays.*;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-import javax.management.openmbean.OpenType;
-
-import org.bson.BsonDocument;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.Conventions;
@@ -28,7 +23,6 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 
 import com.mongodb.MongoException;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -37,7 +31,6 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import com.mysql.cj.jdbc.result.UpdatableResultSet;
 
 import es.um.sisdist.backend.dao.models.Conversation;
 import es.um.sisdist.backend.dao.models.Dialogue;
@@ -86,11 +79,10 @@ public class MongoUserDAO implements IUserDAO {
 
     @Override
     public Optional<User> crearUser(String email, String password, String name) {
-
         Optional<User> u = getUserByEmail(email);
+
         if (!u.isPresent()) {
             String token = UUID.randomUUID().toString();
-            // Nota: El id se genera ya en la función.
             User user = new User(email, UserUtils.md5pass(password), name, token, 0, 0);
             try {
                 collection.get().insertOne(user);
@@ -100,6 +92,7 @@ public class MongoUserDAO implements IUserDAO {
             }
             return Optional.of(user);
         }
+
         return Optional.empty();
 
     }
@@ -163,9 +156,11 @@ public class MongoUserDAO implements IUserDAO {
     @Override
     public Optional<Conversation> createConversation(String userID, String convName) {
         Optional<User> u = getUserById(userID);
+
         if (u.isPresent()) {
             User user = u.get();
             Optional<Conversation> conv = user.createConversation(convName);
+
             if (conv.isPresent()) {
                 List<Conversation> conversations = user.getConversations();
                 int createdConvs = user.getCreatedConvs();
@@ -174,6 +169,7 @@ public class MongoUserDAO implements IUserDAO {
                 updates.add(Updates.set("conversations", conversations));
                 updates.add(Updates.set("createdConvs", createdConvs));
                 UpdateResult result = collection.get().updateOne(filter, Updates.combine(updates));
+
                 if (result.getModifiedCount() == 1) {
                     return conv;
                 }
@@ -186,9 +182,11 @@ public class MongoUserDAO implements IUserDAO {
     @Override
     public boolean checkIfConvExists(String userID, String convID) {
         Optional<User> u = getUserById(userID);
+
         if (u.isPresent()) {
             User user = u.get();
             List<Conversation> conversations = user.getConversations();
+
             for (Conversation c : conversations) {
                 if (c.getID().equals(convID)) {
                     return true;
@@ -201,9 +199,11 @@ public class MongoUserDAO implements IUserDAO {
 
     public Optional<Conversation> getConvByID(String userID, String convID) {
         Optional<User> u = getUserById(userID);
+
         if (u.isPresent()) {
             User user = u.get();
             List<Conversation> conversations = user.getConversations();
+
             for (Conversation c : conversations) {
                 if (c.getID().equals(convID)) {
                     return Optional.of(c);
@@ -217,13 +217,16 @@ public class MongoUserDAO implements IUserDAO {
     @Override
     public boolean endConversation(String userID, String convID) {
         Optional<User> u = getUserById(userID);
+
         if (u.isPresent()) {
             User user = u.get();
             Optional<List<Conversation>> conv = user.endConversation(convID);
+
             if (conv.isPresent()) {
                 List<Conversation> conversations = conv.get();
                 Bson filter = Filters.eq("id", userID);
                 UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+
                 if (result.getModifiedCount() == 1) {
                     return true;
                 }
@@ -236,13 +239,16 @@ public class MongoUserDAO implements IUserDAO {
     @Override
     public boolean delConversation(String userID, String convID) {
         Optional<User> u = getUserById(userID);
+
         if (u.isPresent()) {
             User user = u.get();
             boolean deleted = user.delConversation(convID);
+
             if (deleted == true) {
                 List<Conversation> conversations = user.getConversations();
                 Bson filter = Filters.eq("id", userID);
                 UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+
                 if (result.getModifiedCount() == 1) {
                     return true;
                 }
@@ -255,11 +261,13 @@ public class MongoUserDAO implements IUserDAO {
     @Override
     public boolean delAllConvs(String userID) {
         Optional<User> u = getUserById(userID);
+
         if (u.isPresent()) {
             User user = u.get();
             List<Conversation> conversations = user.delAllConvs();
             Bson filter = Filters.eq("id", userID);
             UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+
             if (result.getModifiedCount() == 1) {
                 return true;
             }
@@ -274,10 +282,12 @@ public class MongoUserDAO implements IUserDAO {
         if (u.isPresent()) {
             User user = u.get();
             Optional<List<Conversation>> conv = user.addDialogue(convID, new Dialogue(dialogueID, prompt, timestamp));
+
             if (conv.isPresent()) {
                 List<Conversation> conversations = conv.get();
                 Bson filter = Filters.eq("id", userID);
                 UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+
                 if (result.getModifiedCount() == 1) {
                     return true;
                 }
@@ -289,9 +299,11 @@ public class MongoUserDAO implements IUserDAO {
     @Override
     public boolean addResponse(String userID, String convID, String dialogueID, String response) {
         Optional<User> u = getUserById(userID);
+
         if (u.isPresent()) {
             User user = u.get();
             Optional<List<Conversation>> conv = user.addResponse(convID, dialogueID, response);
+
             if (conv.isPresent()) {
                 List<Conversation> conversations = conv.get();
                 Bson filter = Filters.eq("id", userID);
@@ -307,11 +319,13 @@ public class MongoUserDAO implements IUserDAO {
     @Override
     public boolean updatePromptCalls(String userID) {
         Optional<User> u = getUserById(userID);
-        if(u.isPresent()) {
+
+        if (u.isPresent()) {
             User user = u.get();
             user.updatePromptCalls();
             Bson filter = Filters.eq("id", userID);
             UpdateResult result = collection.get().updateOne(filter, Updates.set("promptCalls", user.getPromptCalls()));
+
             if (result.getModifiedCount() == 1) {
                 return true;
             }

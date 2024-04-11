@@ -139,7 +139,8 @@ public class User {
         this.id = UserUtils.md5pass(email);
     }
 
-    public User(String id, String email, String password_hash, String name, String tOKEN, int promptCalls, int createdConvs) {
+    public User(String id, String email, String password_hash, String name, String tOKEN, int promptCalls,
+            int createdConvs) {
         this.id = id;
         this.email = email;
         this.password_hash = password_hash;
