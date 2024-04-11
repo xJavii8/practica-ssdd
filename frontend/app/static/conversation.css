@@ -89,13 +89,7 @@
     text-align: center;
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 1; }
+.spinner-grow {
+    width: 1rem;
+    height: 1rem;
 }
-
-.loading-dots::after {
-    content: '...';
-    animation: blink 1s infinite;
-}
-

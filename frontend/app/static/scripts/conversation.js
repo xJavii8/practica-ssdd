@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const userText = userInput.value.trim();
         if (userText !== '') {
             addMessage('user', userText);
-            addMessage('model', '...');
+            addMessage('model', 'loading');
 
             fetch('/sendPrompt', {
                 method: 'POST',
@@ -117,15 +117,16 @@ function addMessage(sender, text) {
 
     const textDiv = document.createElement('div');
     textDiv.classList.add('text');
-    if(text === "..." && sender === 'model') {
+    if(text === "loading" && sender === 'model') {
+        textDiv.innerHTML = '<div class="spinner-grow text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
         const existingLoadingMessage = document.getElementById('loadingMessage');
         if(existingLoadingMessage) {
             existingLoadingMessage.remove();
         }
         messageDiv.id = 'loadingMessage';
-        textDiv.classList.add('loading-dots');
+    } else {
+        textDiv.textContent = text;
     }
-    textDiv.textContent = text;
 
     if (sender === 'model') {
         messageDiv.appendChild(imgDiv);
