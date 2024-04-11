@@ -112,15 +112,15 @@ def profile():
         else:
             flash('Ha ocurrido un error. Inténtalo de nuevo', 'danger')
     getUserStatsGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/stats')
-    numConvs = 0
+    createdConvs = 0
     promptCalls = 0
     if getUserStatsGET.status_code == 200:
         statsJSON = getUserStatsGET.json()
-        numConvs = statsJSON.get('numConvs', 0)
+        createdConvs = statsJSON.get('createdConvs', 0)
         promptCalls = statsJSON.get('promptCalls', 0)
     else:
         flash("Ha ocurrido un error al obtener tus estadísticas. Inténtalo de nuevo", "danger")
-    return render_template('profile.html', form=form, active_page='profile', numConvs=numConvs, promptCalls=promptCalls)
+    return render_template('profile.html', form=form, active_page='profile', createdConvs=createdConvs, promptCalls=promptCalls)
 
 
 @app.route('/deleteUser', methods=['POST'])

@@ -14,12 +14,12 @@ public class UserDTOUtils
     public static User fromDTO(UserDTO udto)
     {
         return new User(udto.getId(), udto.getEmail(), udto.getPassword(), udto.getName(), udto.getToken(),
-                udto.getPromptCalls());
+                udto.getPromptCalls(), udto.getCreatedConvs());
     }
 
     public static UserDTO toDTO(User u)
     {
         return new UserDTO(u.getId(), u.getEmail(), "", // Password never is returned back
-                u.getName(), u.getToken(), u.getPromptCalls());
+                u.getName(), u.getToken(), u.getPromptCalls(), u.getCreatedConvs());
     }
 }

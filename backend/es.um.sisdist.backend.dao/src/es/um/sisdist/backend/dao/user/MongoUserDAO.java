@@ -91,7 +91,7 @@ public class MongoUserDAO implements IUserDAO {
         if (!u.isPresent()) {
             String token = UUID.randomUUID().toString();
             // Nota: El id se genera ya en la función.
-            User user = new User(email, UserUtils.md5pass(password), name, token, 0);
+            User user = new User(email, UserUtils.md5pass(password), name, token, 0, 0);
             try {
                 collection.get().insertOne(user);
             } catch (MongoException except) {
@@ -168,8 +168,12 @@ public class MongoUserDAO implements IUserDAO {
             Optional<Conversation> conv = user.createConversation(convName);
             if (conv.isPresent()) {
                 List<Conversation> conversations = user.getConversations();
+                int createdConvs = user.getCreatedConvs();
                 Bson filter = Filters.eq("id", userID);
-                UpdateResult result = collection.get().updateOne(filter, Updates.set("conversations", conversations));
+                ArrayList<Bson> updates = new ArrayList<>();
+                updates.add(Updates.set("conversations", conversations));
+                updates.add(Updates.set("createdConvs", createdConvs));
+                UpdateResult result = collection.get().updateOne(filter, Updates.combine(updates));
                 if (result.getModifiedCount() == 1) {
                     return conv;
                 }
@@ -315,5 +319,4 @@ public class MongoUserDAO implements IUserDAO {
 
         return false;
     }
-    
 }

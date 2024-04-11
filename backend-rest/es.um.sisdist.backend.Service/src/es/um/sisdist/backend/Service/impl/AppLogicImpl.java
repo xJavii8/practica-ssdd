@@ -152,7 +152,7 @@ public class AppLogicImpl {
         Optional<User> u = dao.getUserById(userID);
         if(u.isPresent()) {
             User user = u.get();
-            int numConvs = user.getConversations().size();
+            int numConvs = user.getCreatedConvs();
             int promptCalls = user.getPromptCalls();
             return Optional.of(new UserStatsDTO(numConvs, promptCalls));
         }

@@ -18,6 +18,7 @@ public class User {
     private String token;
 
     private int promptCalls;
+    private int createdConvs;
 
     private List<Conversation> conversations;
 
@@ -125,12 +126,20 @@ public class User {
         this.promptCalls = (promptCalls + 1);
     }
 
-    public User(String email, String password_hash, String name, String tOKEN, int promptCalls) {
-        this(email, email, password_hash, name, tOKEN, promptCalls);
+    public int getCreatedConvs() {
+        return createdConvs;
+    }
+
+    public void setCreatedConvs(int createdConvs) {
+        this.createdConvs = createdConvs;
+    }
+
+    public User(String email, String password_hash, String name, String tOKEN, int promptCalls, int createdConvs) {
+        this(email, email, password_hash, name, tOKEN, promptCalls, createdConvs);
         this.id = UserUtils.md5pass(email);
     }
 
-    public User(String id, String email, String password_hash, String name, String tOKEN, int promptCalls) {
+    public User(String id, String email, String password_hash, String name, String tOKEN, int promptCalls, int createdConvs) {
         this.id = id;
         this.email = email;
         this.password_hash = password_hash;
@@ -138,12 +147,13 @@ public class User {
         token = tOKEN;
         this.promptCalls = promptCalls;
         this.conversations = new ArrayList<Conversation>();
+        this.createdConvs = createdConvs;
     }
 
     @Override
     public String toString() {
         return "User [id=" + id + ", email=" + email + ", password_hash=" + password_hash + ", name=" + name
-                + ", TOKEN=" + token + ", promptCalls=" + promptCalls + "]";
+                + ", TOKEN=" + token + ", promptCalls=" + promptCalls + ", createdConvs=" + createdConvs + "]";
     }
 
     public User() {
@@ -152,6 +162,7 @@ public class User {
     public Optional<Conversation> createConversation(String convName) {
         Conversation c = new Conversation(this.id, convName);
         this.conversations.add(c);
+        this.createdConvs = (createdConvs + 1);
         return Optional.of(c);
     }
 

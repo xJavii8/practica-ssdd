@@ -97,7 +97,7 @@ public class SQLUserDAO implements IUserDAO {
             stm.setInt(6, 0);
             int result = stm.executeUpdate();
             if (result == 1) {
-                return Optional.of(new User(userID, email, UserUtils.md5pass(password), name, token, 0));
+                return Optional.of(new User(userID, email, UserUtils.md5pass(password), name, token, 0, 0));
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -113,7 +113,8 @@ public class SQLUserDAO implements IUserDAO {
                     result.getString(3), // pwhash
                     result.getString(4), // name
                     result.getString(5), // token
-                    result.getInt(6))); // promptCalls
+                    result.getInt(6), // promptCalls
+                    result.getInt(7))); // createdConvs
         } catch (SQLException e) {
             return Optional.empty();
         }

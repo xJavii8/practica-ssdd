@@ -13,6 +13,7 @@ public class UserDTO
     private String token;
 
     private int promptCalls;
+    private int createdConvs;
 
     /**
      * @return the id
@@ -110,7 +111,15 @@ public class UserDTO
         this.promptCalls = promptCalls;
     }
 
-    public UserDTO(String id, String email, String password, String name, String tOKEN, int promptCalls)
+    public int getCreatedConvs() {
+        return createdConvs;
+    }
+
+    public void setCreatedConvs(int createdConvs) {
+        this.createdConvs = createdConvs;
+    }
+
+    public UserDTO(String id, String email, String password, String name, String tOKEN, int promptCalls, int createdConvs)
     {
         super();
         this.id = id;
@@ -119,6 +128,7 @@ public class UserDTO
         this.name = name;
         token = tOKEN;
         this.promptCalls = promptCalls;
+        this.createdConvs = createdConvs;
     }
 
     public UserDTO()
