@@ -12,7 +12,8 @@ public class UserDTO
 
     private String token;
 
-    private int visits;
+    private int promptCalls;
+    private int createdConvs;
 
     /**
      * @return the id
@@ -95,22 +96,30 @@ public class UserDTO
     }
 
     /**
-     * @return the visits
+     * @return the promptCalls
      */
-    public int getVisits()
+    public int getPromptCalls()
     {
-        return visits;
+        return promptCalls;
     }
 
     /**
-     * @param visits the visits to set
+     * @param promptCalls the promptCalls to set
      */
-    public void setVisits(int visits)
+    public void setPromptCalls(int promptCalls)
     {
-        this.visits = visits;
+        this.promptCalls = promptCalls;
     }
 
-    public UserDTO(String id, String email, String password, String name, String tOKEN, int visits)
+    public int getCreatedConvs() {
+        return createdConvs;
+    }
+
+    public void setCreatedConvs(int createdConvs) {
+        this.createdConvs = createdConvs;
+    }
+
+    public UserDTO(String id, String email, String password, String name, String tOKEN, int promptCalls, int createdConvs)
     {
         super();
         this.id = id;
@@ -118,7 +127,8 @@ public class UserDTO
         this.password = password;
         this.name = name;
         token = tOKEN;
-        this.visits = visits;
+        this.promptCalls = promptCalls;
+        this.createdConvs = createdConvs;
     }
 
     public UserDTO()

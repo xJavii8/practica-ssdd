@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     const chatForm = document.getElementById('chatForm');
     const userInput = document.getElementById('userInput');
-    const chatArea = document.getElementById('chatArea');
     const button = document.getElementById('button-addon2');
 
     button.disabled = true;
@@ -16,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const userText = userInput.value.trim();
         if (userText !== '') {
             addMessage('user', userText);
+            addMessage('model', 'loading');
 
             fetch('/sendPrompt', {
                 method: 'POST',
@@ -23,14 +23,29 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: JSON.stringify({ prompt: userText })
             })
             .then(response => {
+                const existingLoadingMessage = document.getElementById('loadingMessage');
+                if(existingLoadingMessage) {
+                    existingLoadingMessage.remove();
+                }
+
+                if(response.status === 204) {
+                    console.log("No se puede mandar un mensaje mientras está en BUSY o FINISHED");
+                    return {status: 204};
+                }
+
                 if (!response.ok) {
                     throw new Error('Error al enviar el mensaje');
                 }
                 return response.json();
             })
             .then(data => {
-                const lastDialogue = data.dialogues[data.dialogues.length - 1]
-                addMessage('model', lastDialogue.response);
+                if(data.status === 204) {
+                    window.location.reload();
+                    console.log("No se puede mandar un mensaje mientras está en BUSY o FINISHED");
+                } else if(data.dialogues && data.dialogues.length > 0) {
+                    const lastDialogue = data.dialogues[data.dialogues.length - 1];
+                    addMessage('model', lastDialogue.answer);
+                }
             })
             .catch(error => {
                 console.error("Error:", error);
@@ -67,10 +82,17 @@ document.addEventListener("DOMContentLoaded", function() {
             return response.json();
         })
         .then(data => {
+            console.log("DATA: ");
+            console.log(data);
             console.log(data.message);
             window.location.href = '/';
         })
         .catch(error => {
+            const existingLoadingMessage = document.getElementById('loadingMessage');
+            if(existingLoadingMessage) {
+                existingLoadingMessage.remove();
+            }
+
             console.error('Error:', error);
         });
 
@@ -95,7 +117,16 @@ function addMessage(sender, text) {
 
     const textDiv = document.createElement('div');
     textDiv.classList.add('text');
-    textDiv.textContent = text;
+    if(text === "loading" && sender === 'model') {
+        textDiv.innerHTML = '<div class="spinner-grow text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
+        const existingLoadingMessage = document.getElementById('loadingMessage');
+        if(existingLoadingMessage) {
+            existingLoadingMessage.remove();
+        }
+        messageDiv.id = 'loadingMessage';
+    } else {
+        textDiv.textContent = text;
+    }
 
     if (sender === 'model') {
         messageDiv.appendChild(imgDiv);
@@ -113,8 +144,8 @@ function loadMessages(dialogues) {
     dialogues.forEach(dialogue => {
         console.log("DIALOGUE: " + dialogue);
         console.log("DIALOGUE PROMPT: " + dialogue.prompt);
-        console.log("DIALOGUE RESPONSE: " + dialogue.response);
+        console.log("DIALOGUE RESPONSE: " + dialogue.answer);
         addMessage('user', dialogue.prompt);
-        addMessage('model', dialogue.response);
+        addMessage('model', dialogue.answer);
     });
 }

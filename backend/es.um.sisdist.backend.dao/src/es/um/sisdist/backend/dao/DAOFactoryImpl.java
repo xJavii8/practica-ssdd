@@ -11,17 +11,14 @@ import es.um.sisdist.backend.dao.user.SQLUserDAO;
  * @author dsevilla
  *
  */
-public class DAOFactoryImpl implements IDAOFactory
-{
+public class DAOFactoryImpl implements IDAOFactory {
     @Override
-    public IUserDAO createSQLUserDAO()
-    {
+    public IUserDAO createSQLUserDAO() {
         return new SQLUserDAO();
     }
 
     @Override
-    public IUserDAO createMongoUserDAO()
-    {
+    public IUserDAO createMongoUserDAO() {
         return new MongoUserDAO();
     }
 }

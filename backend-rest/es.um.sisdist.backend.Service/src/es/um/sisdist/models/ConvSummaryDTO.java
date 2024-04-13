@@ -1,14 +1,17 @@
 package es.um.sisdist.models;
 
-public class ConversationSummary {
+import jakarta.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+public class ConvSummaryDTO {
     private String name;
     private int status;
     private String id;
 
-    public ConversationSummary() {
+    public ConvSummaryDTO() {
     }
 
-    public ConversationSummary(String name, int status, String id) {
+    public ConvSummaryDTO(String name, int status, String id) {
         this.name = name;
         this.status = status;
         this.id = id;

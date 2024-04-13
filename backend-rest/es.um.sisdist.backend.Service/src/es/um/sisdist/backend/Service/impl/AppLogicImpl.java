@@ -6,30 +6,21 @@ package es.um.sisdist.backend.Service.impl;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.glassfish.jersey.internal.util.Tokenizer;
-import org.glassfish.jersey.message.internal.Token;
-
-import com.google.protobuf.Option;
-import java.util.Date;
 import java.util.List;
 
 import es.um.sisdist.backend.grpc.GETRequest;
-import es.um.sisdist.backend.grpc.GETResponse;
 import es.um.sisdist.backend.grpc.GrpcServiceGrpc;
 import es.um.sisdist.backend.grpc.POSTRequest;
 import es.um.sisdist.backend.grpc.POSTResponse;
 import es.um.sisdist.backend.grpc.PingRequest;
-import es.um.sisdist.models.ConversationSummary;
-import es.um.sisdist.models.UserDTO;
-import es.um.sisdist.models.UserDTOUtils;
+import es.um.sisdist.models.ConvSummaryDTO;
+import es.um.sisdist.models.UserStatsDTO;
 import es.um.sisdist.backend.dao.DAOFactoryImpl;
 import es.um.sisdist.backend.dao.IDAOFactory;
 import es.um.sisdist.backend.dao.models.Conversation;
-import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.user.IUserDAO;
@@ -147,12 +138,24 @@ public class AppLogicImpl {
         return Optional.empty();
     }
 
-    public Optional<List<ConversationSummary>> getConversations(String userID) {
+    public Optional<UserStatsDTO> getUserStats(String userID) {
+        Optional<User> u = dao.getUserById(userID);
+        if(u.isPresent()) {
+            User user = u.get();
+            int numConvs = user.getCreatedConvs();
+            int promptCalls = user.getPromptCalls();
+            return Optional.of(new UserStatsDTO(numConvs, promptCalls));
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<List<ConvSummaryDTO>> getConversations(String userID) {
         Optional<User> u = dao.getUserById(userID);
         if (u.isPresent()) {
             User user = u.get();
             return Optional.of(user.getConversations().stream()
-                    .map(conversation -> new ConversationSummary(conversation.getName(), conversation.getStatus(),
+                    .map(conversation -> new ConvSummaryDTO(conversation.getName(), conversation.getStatus(),
                             conversation.getID()))
                     .collect(Collectors.toList()));
         }
@@ -164,6 +167,14 @@ public class AppLogicImpl {
         return dao.endConversation(userID, convID);
     }
 
+    public boolean delConversation(String userID, String convID) {
+        return dao.delConversation(userID, convID);
+    }
+
+    public boolean delAllConvs(String userID) {
+        return dao.delAllConvs(userID);
+    }
+
     public Optional<Conversation> getConversationData(String userID, String convID) {
         Optional<Conversation> c = dao.getConvByID(userID, convID);
         if (c.isPresent()) {
@@ -173,14 +184,26 @@ public class AppLogicImpl {
         return Optional.empty();
     }
 
-    public Optional<Conversation> sendPrompt(String userID, String convID, String prompt) {
+    public boolean isConvReady(String userID, String convID) {
+        Optional<Conversation> c = dao.getConvByID(userID, convID);
+        if(c.isPresent()) {
+            Conversation conv = c.get();
+            if(conv.getStatus() == Conversation.READY) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Optional<Conversation> sendPrompt(String userID, String convID, String prompt, long timestamp) {
+        dao.updatePromptCalls(userID);
         POSTRequest req1 = POSTRequest.newBuilder().setPrompt(prompt).build();
         POSTResponse resp1;
 
         try {
             resp1 = blockingStub.promptPOST(req1);
-            dao.createDialogue(userID, convID, resp1.getLocalization().split("/")[2], prompt,
-                    new Date(System.currentTimeMillis()));
+            dao.createDialogue(userID, convID, resp1.getLocalization().split("/")[2], prompt, timestamp);
             GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(convID)
                     .setIdUser(userID).build();
 

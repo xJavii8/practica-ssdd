@@ -6,8 +6,11 @@
 
 {% block content %}
 <div class="customContainer">
-    <h2>Conversaciones</h2>
-    <div class="conversations-list">
+    <div class="header">
+        <h2>Conversaciones</h2>
+        <button id="delAllConv" class="btn btn-warning">Eliminar todas las conversaciones</button>
+    </div>
+    <div class="conversations-list {% if not allConvs %}empty{% endif %}">
         {% if allConvs %}
         {% for conversation in allConvs %}
         <div class="conversation-item" id="conv-{{ loop.index}}">
@@ -26,6 +29,14 @@
         {% else %}
         <p>No hay conversaciones disponibles.</p>
         {% endif %}
+    </div>
+</div>
+
+<div id="confirmationDialog" class="customContainer confirmation-dialog" style="display: none;">
+    <div class="confirmation-content">
+        <p>¿Seguro que quieres eliminar todas las conversaciones?</p>
+        <button id="confirmDel" class="btn btn-danger">Sí</button>
+        <button id="cancelDel" class="btn btn-secondary">No</button>
     </div>
 </div>
 

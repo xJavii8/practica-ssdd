@@ -8,14 +8,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import es.um.sisdist.backend.dao.models.Conversation;
-import es.um.sisdist.backend.dao.models.Dialogue;
 import es.um.sisdist.backend.dao.models.User;
 import es.um.sisdist.backend.dao.models.utils.UserUtils;
 import es.um.sisdist.backend.dao.utils.Lazy;
@@ -97,7 +94,7 @@ public class SQLUserDAO implements IUserDAO {
             stm.setInt(6, 0);
             int result = stm.executeUpdate();
             if (result == 1) {
-                return Optional.of(new User(userID, email, UserUtils.md5pass(password), name, token, 0));
+                return Optional.of(new User(userID, email, UserUtils.md5pass(password), name, token, 0, 0));
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -113,7 +110,8 @@ public class SQLUserDAO implements IUserDAO {
                     result.getString(3), // pwhash
                     result.getString(4), // name
                     result.getString(5), // token
-                    result.getInt(6))); // visits
+                    result.getInt(6), // promptCalls
+                    result.getInt(7))); // createdConvs
         } catch (SQLException e) {
             return Optional.empty();
         }
@@ -155,18 +153,6 @@ public class SQLUserDAO implements IUserDAO {
     }
 
     @Override
-    public Optional<List<Dialogue>> getAllDialoguesFromUser(String userID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllDialogosOfUser'");
-    }
-
-    @Override
-    public Optional<Dialogue> getDialogueFromUser(String userID, String dialogueID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDialogoOfUser'");
-    }
-
-    @Override
     public boolean endConversation(String userID, String convID) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'endConversation'");
@@ -185,7 +171,7 @@ public class SQLUserDAO implements IUserDAO {
     }
 
     @Override
-    public boolean createDialogue(String userID, String convID, String dialogueID, String prompt, Date timestamp) {
+    public boolean createDialogue(String userID, String convID, String dialogueID, String prompt, long timestamp) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'createDialogue'");
     }
@@ -194,6 +180,24 @@ public class SQLUserDAO implements IUserDAO {
     public boolean addResponse(String userID, String convID, String dialogueID, String response) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'addResponse'");
+    }
+
+    @Override
+    public boolean delConversation(String userID, String convID) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'delConversation'");
+    }
+
+    @Override
+    public boolean delAllConvs(String userID) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'delAllConvs'");
+    }
+
+    @Override
+    public boolean updatePromptCalls(String userID) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updatePromptCalls'");
     }
 
 }

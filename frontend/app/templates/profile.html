@@ -14,14 +14,13 @@
     <div class="col-md-3">
         <div class="customContainer p-3">
             <h3 class="text-center">Estadísticas</h3>
-            <p class="fw-bold">Visitas: placeholder</p>
-            <p class="fw-bold">Conversaciones: placeholder</p>
-            <p class="fw-bold">Llamadas al prompt: placeholder</p>
+            <p>Conversaciones creadas: <strong>{{ createdConvs }}</strong></p>
+            <p>Llamadas al prompt: <strong>{{ promptCalls }}</strong></p>
         </div>
     </div>
 
     <div class="col-md-6">
-        <div class="customContainer p-3">
+        <div class="customContainer p-3" id="infoPersonal">
             <h3 class="section-title">Información personal</h3>
             <form action="/profile" method="POST">
                 {{ form.hidden_tag() }}
@@ -57,7 +56,15 @@
 {% if messages %}
     <div class="alert-container col-md-6 mx-auto">
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {% if category == 'danger' %}
+                <svg class="bi flex-shrink-0 me-2" width="20" height="20" role="img" aria-label="Danger:">
+                    <use xlink:href="#exclamation-triangle-fill"/>
+                </svg>
+            {% endif %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            {{ message }}
+        </div>
         {% endfor %}
     </div>
 {% endif %}

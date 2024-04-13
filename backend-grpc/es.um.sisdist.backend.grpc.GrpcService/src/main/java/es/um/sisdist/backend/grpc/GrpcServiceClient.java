@@ -31,6 +31,5 @@
 
 package es.um.sisdist.backend.grpc;
 
-public class GrpcServiceClient 
-{
+public class GrpcServiceClient {
 }

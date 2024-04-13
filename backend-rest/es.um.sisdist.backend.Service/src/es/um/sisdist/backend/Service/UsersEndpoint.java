@@ -1,11 +1,7 @@
 
 package es.um.sisdist.backend.Service;
 
-import static com.mongodb.MongoClientSettings.builder;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import es.um.sisdist.backend.Service.impl.AppLogicImpl;
@@ -16,10 +12,11 @@ import es.um.sisdist.models.AllConvsDTOUtils;
 import es.um.sisdist.models.ChangeUserInfoDTO;
 import es.um.sisdist.models.ConvDTO;
 import es.um.sisdist.models.ConvDTOUtils;
-import es.um.sisdist.models.ConversationSummary;
+import es.um.sisdist.models.ConvSummaryDTO;
 import es.um.sisdist.models.PromptDTO;
 import es.um.sisdist.models.UserDTO;
 import es.um.sisdist.models.UserDTOUtils;
+import es.um.sisdist.models.UserStatsDTO;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -49,12 +46,10 @@ public class UsersEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerUser(UserDTO uo) {
         Optional<User> u = impl.createUser(uo.getEmail(), uo.getName(), uo.getPassword());
+
         if (u.isPresent()) {
-            // Mejor retonar objeto completo que solo el id para no tener llamadas de más a
-            // la API.
             return Response.ok(UserDTOUtils.toDTO(u.get())).build();
         } else {
-            // Error 409 si email ya existe.
             return Response.status(Status.CONFLICT).build();
         }
     }
@@ -66,6 +61,7 @@ public class UsersEndpoint {
     public Response changeInfoUser(ChangeUserInfoDTO cuio) {
         Optional<User> u = impl.modifyUser(cuio.getActualEmail(), cuio.getNewMail(), cuio.getName(),
                 cuio.getPassword());
+
         if (u.isPresent()) {
             return Response.ok(UserDTOUtils.toDTO(u.get())).build();
         } else {
@@ -79,6 +75,7 @@ public class UsersEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteUser(@PathParam("id") String id) {
         boolean deleted = impl.deleteUser(id);
+
         if (deleted) {
             return Response.status(Status.OK).build();
         } else {
@@ -91,8 +88,8 @@ public class UsersEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createConv(@PathParam("id") String id, ConvDTO cDTO) {
-
         Optional<Conversation> conv = impl.createConversation(id, cDTO.getConvName());
+
         if (!conv.isPresent()) {
             return Response.status(Status.NO_CONTENT).build();
         }
@@ -108,7 +105,7 @@ public class UsersEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public AllConvsDTO getConvs(@PathParam("id") String id) {
 
-        Optional<List<ConversationSummary>> conv = impl.getConversations(id);
+        Optional<List<ConvSummaryDTO>> conv = impl.getConversations(id);
         if (!conv.isPresent()) {
             return new AllConvsDTO();
         }
@@ -117,12 +114,26 @@ public class UsersEndpoint {
     }
 
     @GET
+    @Path("{id}/stats")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public UserStatsDTO getUserStats(@PathParam("id") String id) {
+        Optional<UserStatsDTO> stats = impl.getUserStats(id);
+
+        if (stats.isPresent()) {
+            return stats.get();
+        }
+
+        return new UserStatsDTO();
+    }
+
+    @GET
     @Path("{id}/dialogue/{convID}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ConvDTO getConvData(@PathParam("id") String id, @PathParam("convID") String convID) {
-
         Optional<Conversation> c = impl.getConversationData(id, convID);
+
         if (!c.isPresent()) {
             return new ConvDTO();
         }
@@ -134,8 +145,42 @@ public class UsersEndpoint {
     @Path("{id}/dialogue/{convID}/end")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public boolean endConversation(@PathParam("id") String id, @PathParam("convID") String convID) {
-        return impl.endConversation(id, convID);
+    public Response endConversation(@PathParam("id") String id, @PathParam("convID") String convID) {
+        boolean ended = impl.endConversation(id, convID);
+
+        if (ended == true) {
+            return Response.status(200).build();
+        }
+
+        return Response.status(500).build();
+    }
+
+    @DELETE
+    @Path("{id}/dialogue/{convID}/del")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response delConversation(@PathParam("id") String id, @PathParam("convID") String convID) {
+        boolean deleted = impl.delConversation(id, convID);
+
+        if (deleted == true) {
+            return Response.status(200).build();
+        }
+
+        return Response.status(500).build();
+    }
+
+    @DELETE
+    @Path("{id}/delAllConvs")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response dellAllConvs(@PathParam("id") String id) {
+        boolean deleted = impl.delAllConvs(id);
+
+        if (deleted == true) {
+            return Response.status(200).build();
+        }
+
+        return Response.status(500).build();
     }
 
     @POST
@@ -143,12 +188,17 @@ public class UsersEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendPrompt(PromptDTO pDTO) {
-        Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt());
+        if (impl.isConvReady(pDTO.getUserID(), pDTO.getConvID())) {
+            Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt(),
+                    pDTO.getTimestamp());
 
-        if (c.isPresent()) {
-            return Response.status(200).entity(c.get()).build();
+            if (c.isPresent()) {
+                return Response.status(200).entity(c.get()).build();
+            }
+            return Response.status(404).build();
         }
-        return Response.status(404).build();
+
+        return Response.status(Status.NO_CONTENT).build();
     }
 
 }
