@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('delConversation').addEventListener('click', function() {
-        document.getElementById('confirmationDialog').style.display = 'flex'; // Diálogo de confirmación para terminar la conver
+        document.getElementById('confirmationDialog').style.display = 'flex'; // Diálogo de confirmación para eliminar la conver
     });
 
-    // Finalización de conversación
+    // Eliminación de conversación
     document.getElementById('confirmDel').addEventListener('click', function() {
         const dialogContainer = document.getElementById('confirmationDialog');
         const convID = dialogContainer.getAttribute('data-convID');
@@ -25,9 +25,6 @@ document.addEventListener("DOMContentLoaded", function() {
             return response.json();
         })
         .then(data => {
-            console.log("DATA: ");
-            console.log(data);
-            console.log(data.message);
             window.location.href = '/allConversations';
         })
         .catch(error => {
@@ -37,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('confirmationDialog').style.display = 'none';
     });
 
-    // Cancelación de finalización
+    // Cancelación de eliminación
     document.getElementById('cancelDel').addEventListener('click', function() {
         document.getElementById('confirmationDialog').style.display = 'none';
     });
@@ -70,10 +67,8 @@ function addMessage(sender, text) {
 }
 
 function loadMessages(dialogues) {
+    // Cargamos los mensajes de la conversación
     dialogues.forEach(dialogue => {
-        console.log("DIALOGUE: " + dialogue);
-        console.log("DIALOGUE PROMPT: " + dialogue.prompt);
-        console.log("DIALOGUE RESPONSE: " + dialogue.answer);
         addMessage('user', dialogue.prompt);
         addMessage('model', dialogue.answer);
     });

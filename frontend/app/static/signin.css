@@ -41,3 +41,10 @@ body {
 .form-signin button[type="submit"] {
   margin-bottom: 1rem;
 }
+
+.alert .btn-close {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.5rem;
+  padding: 0.5rem;
+}

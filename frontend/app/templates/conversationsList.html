@@ -30,6 +30,26 @@
         <p>No hay conversaciones disponibles.</p>
         {% endif %}
     </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="alert-container mx-auto">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {% if category == 'danger' %}
+                    <svg class="bi flex-shrink-0 me-2" width="20" height="20" role="img" aria-label="Danger:">
+                        <use xlink:href="#exclamation-triangle-fill"/>
+                    </svg>
+                {% elif category == 'success' %}
+                    <svg class="bi flex-shrink-0 me-2" width="20" height="20" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+                {% endif %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
 </div>
 
 <div id="confirmationDialog" class="customContainer confirmation-dialog" style="display: none;">

@@ -71,6 +71,7 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase {
 			}
 			in.close();
 
+			// Creación de la respuesta gRPC
 			POSTResponse resp = POSTResponse.newBuilder().setLocalization(connection.getHeaderField("Location"))
 					.build();
 			responseObserver.onNext(resp);
@@ -86,6 +87,7 @@ class GrpcServiceImpl extends GrpcServiceGrpc.GrpcServiceImplBase {
 		try {
 			String locationID = request.getAnswerURL().split("/")[2];
 			URL url = new URL("http://llamachat:5020" + request.getAnswerURL());
+			// Inicio del hilo que estará esperando a la respuesta de LlamaChat
 			new InnerGrpcServiceImplToLlama(url, request.getIdUser(), locationID, request.getIdConversation()).run();
 			GETResponse resp = GETResponse.newBuilder().setAnswerText(locationID).build();
 			responseObserver.onNext(resp);
@@ -111,6 +113,7 @@ class InnerGrpcServiceImplToLlama extends Thread {
 		this.locationID = locationID;
 		this.convID = convID;
 
+		// Nos aseguramos de que este hilo pueda funcionar tanto para MongoDB como para SQL
 		daoFactory = new DAOFactoryImpl();
 		Optional<String> backend = Optional.ofNullable(System.getenv("DB_BACKEND"));
 
@@ -128,6 +131,7 @@ class InnerGrpcServiceImplToLlama extends Thread {
 		int responseCode;
 		System.out.println("URL: " + url.toString());
 
+		// Hacemos un bucle para esperar a la respuesta
 		while (true) {
 			try {
 				connection = (HttpURLConnection) url.openConnection();
@@ -155,12 +159,13 @@ class InnerGrpcServiceImplToLlama extends Thread {
 				break;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				break;
 			}
 		}
 
 		Document doc = Document.parse(response.toString());
-		String answer = doc.getString("answer");
-		dao.addResponse(userID, convID, locationID, answer);
+		String answer = doc.getString("answer"); // Obtenemos la respuesta
+		dao.addResponse(userID, convID, locationID, answer); // Introducimos la respuesta en el diálogo
 	}
 
 }

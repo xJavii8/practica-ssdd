@@ -119,6 +119,7 @@ public class MongoUserDAO implements IUserDAO {
         if (userExists.isPresent()) {
             User u = userExists.get();
 
+            // Comprobación de que el mail no es el mismo y que este no existe ya
             if (!newEmail.isEmpty() && !actualEmail.equals(newEmail)) {
                 Optional<User> userWithNewEmail = getUserByEmail(newEmail);
                 if (userWithNewEmail.isPresent()) {
@@ -126,6 +127,7 @@ public class MongoUserDAO implements IUserDAO {
                 }
             }
 
+            // Actualización de los datos
             if (error == false) {
                 Bson filter = Filters.eq("email", actualEmail);
                 ArrayList<Bson> updates = new ArrayList<>();
@@ -161,6 +163,7 @@ public class MongoUserDAO implements IUserDAO {
             User user = u.get();
             Optional<Conversation> conv = user.createConversation(convName);
 
+            // Actualización del usuario en la DB
             if (conv.isPresent()) {
                 List<Conversation> conversations = user.getConversations();
                 int createdConvs = user.getCreatedConvs();
@@ -177,24 +180,6 @@ public class MongoUserDAO implements IUserDAO {
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public boolean checkIfConvExists(String userID, String convID) {
-        Optional<User> u = getUserById(userID);
-
-        if (u.isPresent()) {
-            User user = u.get();
-            List<Conversation> conversations = user.getConversations();
-
-            for (Conversation c : conversations) {
-                if (c.getID().equals(convID)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     public Optional<Conversation> getConvByID(String userID, String convID) {

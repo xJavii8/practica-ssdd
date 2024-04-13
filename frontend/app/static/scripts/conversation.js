@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
         button.disabled = !this.value.length;
     });
 
+    // Procesamiento de envío de prompt
     chatForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const userText = userInput.value.trim();
@@ -82,9 +83,6 @@ document.addEventListener("DOMContentLoaded", function() {
             return response.json();
         })
         .then(data => {
-            console.log("DATA: ");
-            console.log(data);
-            console.log(data.message);
             window.location.href = '/';
         })
         .catch(error => {
@@ -117,6 +115,8 @@ function addMessage(sender, text) {
 
     const textDiv = document.createElement('div');
     textDiv.classList.add('text');
+
+    // Mientras se está generando la respuesta, damos a entender al usuario que se está procesando su petición
     if(text === "loading" && sender === 'model') {
         textDiv.innerHTML = '<div class="spinner-grow text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
         const existingLoadingMessage = document.getElementById('loadingMessage');
@@ -141,10 +141,8 @@ function addMessage(sender, text) {
 }
 
 function loadMessages(dialogues) {
+    // Cargamos los mensajes de la conversación
     dialogues.forEach(dialogue => {
-        console.log("DIALOGUE: " + dialogue);
-        console.log("DIALOGUE PROMPT: " + dialogue.prompt);
-        console.log("DIALOGUE RESPONSE: " + dialogue.answer);
         addMessage('user', dialogue.prompt);
         addMessage('model', dialogue.answer);
     });

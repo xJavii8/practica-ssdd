@@ -32,19 +32,22 @@ def serve_static(path):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == "POST":
-        convNameJSON = {"convName": request.form['convName']}
+    if request.method == "POST": # En este caso, una petición POST es para crear una nueva conversación
+        requestJSON = {"convName": request.form['convName']}
         userID = str(format(current_user.id, '032x'))
-        createConvPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue', json=convNameJSON)
-        if createConvPOST.status_code == 201:
-            session['convName'] = request.form['convName']
-            session['convID'] = createConvPOST.json().get('ID')
-            session['next'] = createConvPOST.json().get('nextURL')
-            session['end'] = createConvPOST.json().get('endURL')
+        response = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue', json=requestJSON)
+
+        if response.status_code == 201:
+            responseJSON = response.json()
+            session['convName'] = responseJSON.get('name') # Guardamos los datos de la conversación para usarlos en otros puntos del código
+            session['convID'] = responseJSON.get('ID')
+            session['next'] = responseJSON.get('nextURL')
+            session['end'] = responseJSON.get('endURL')
             session['messages'] = None
             return redirect(url_for('conversation'))
         else:
             flash('Esta conversación ya existe. Por favor, elige otro nombre', 'danger')
+
     return render_template('index.html', active_page='index')
 
 
@@ -54,19 +57,24 @@ def login():
         return redirect(url_for('index'))
     else:
         form = LoginForm(None if request.method != 'POST' else request.form)
+
         if request.method == "POST" and form.validate():
-            loginData = {"email": form.email.data, "password": form.password.data}
-            loginPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/checkLogin', json=loginData)
-            if loginPOST.status_code == 200:
-                json = loginPOST.json()
-                user = User(int(json['id'], 16), json['name'], json['email'], form.password.data.encode('utf-8'))
+            requestJSON = {"email": form.email.data, "password": form.password.data}
+            response = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/checkLogin', json=requestJSON)
+
+            if response.status_code == 200: # Tratamiento de los datos para el inicio de sesión del usuario
+                responseJSON = response.json()
+                uid = int(responseJSON['id'], 16)
+                user = User(uid, responseJSON['name'], responseJSON['email'], form.password.data.encode('utf-8'))
                 users.append(user)
                 login_user(user, remember=form.remember_me.data)
                 return redirect(url_for('index'))
             else:
                 flash('Credenciales incorrectas. Vuelve a intentarlo.', 'danger')
+
         elif request.method == "POST" and not form.validate():
             flash('Por favor, revisa tus credenciales.', 'danger')
+
         return render_template('login.html', form=form, active_page='login')
 
 
@@ -76,19 +84,23 @@ def register():
         return redirect(url_for('index'))
     else:
         form = RegistrationForm(None if request.method != 'POST' else request.form)
+
         if request.method == "POST" and form.validate():
-            registerData = {"email": form.email.data, "name": form.name.data, "password": form.password.data}
-            registerPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/register', json=registerData)
-            if registerPOST.status_code == 200:
-                json = registerPOST.json()
-                user = User(int(json['id'], 16), json['name'], json['email'], form.password.data.encode('utf-8'))
+            requestJSON = {"email": form.email.data, "name": form.name.data, "password": form.password.data}
+            response = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/register', json=requestJSON)
+
+            if response.status_code == 200: # Tratamiento de los datos para el registro del usuario
+                responseJSON = response.json()
+                user = User(int(responseJSON['id'], 16), responseJSON['name'], responseJSON['email'], form.password.data.encode('utf-8'))
                 users.append(user)
-                login_user(user)
+                login_user(user) # En este caso, cuando el usuario se registra, inicia sesión automáticamente
                 return redirect(url_for('index'))
             else:
                 flash('Este usuario ya existe.', 'danger')
+
         elif request.method == "POST" and not form.validate():
             flash('Por favor, revisa tus credenciales.', 'danger')
+
         return render_template('signup.html', form=form, active_page='register')
 
 
@@ -97,29 +109,37 @@ def register():
 def profile():
     userID = str(format(current_user.id, '032x'))
     form = ChangeUserForm(None if request.method != 'POST' else request.form)
+
     if request.method == "POST" and form.validate():
-        changeUserInfoData = {"actualEmail": form.actualEmail.data, "newMail": form.newMail.data, "name": form.name.data, "password": form.newPassword.data}
-        changeUserInfoPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/changeInfo', json=changeUserInfoData)
-        if changeUserInfoPOST.status_code == 200:
-            json = changeUserInfoPOST.json()
+        # Si se trata de una petición POST, el usuario quiere actualizar sus datos
+        requestJSON = {"actualEmail": form.actualEmail.data, "newMail": form.newMail.data, "name": form.name.data, "password": form.newPassword.data}
+        responsePOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/changeInfo', json=requestJSON)
+    
+        if responsePOST.status_code == 200: # Tratamiento de los datos para su actualización
+            responseJSON = responsePOST.json()
             users.remove(current_user)
             logout_user()
-            user = User(int(json['id'], 16), json['name'], json['email'], form.newPassword.data.encode('utf-8'))
+            user = User(int(responseJSON['id'], 16), responseJSON['name'], responseJSON['email'], form.newPassword.data.encode('utf-8'))
             users.append(user)
             login_user(user)
             flash('Credenciales actualizadas correctamente.', 'success')
             return redirect(url_for('profile'))
         else:
             flash('Ha ocurrido un error. Inténtalo de nuevo', 'danger')
-    getUserStatsGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/stats')
-    createdConvs = 0
-    promptCalls = 0
-    if getUserStatsGET.status_code == 200:
-        statsJSON = getUserStatsGET.json()
+
+    # En este caso, siempre vamos a obtener las estadísticas del usuario, ya que puede que se haya creado
+    # una nueva conversación o se hayan hecho más llamadas al prompt
+    responseGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/stats')
+
+    if responseGET.status_code == 200:
+        statsJSON = responseGET.json()
         createdConvs = statsJSON.get('createdConvs', 0)
         promptCalls = statsJSON.get('promptCalls', 0)
     else:
+        createdConvs = 0
+        promptCalls = 0
         flash("Ha ocurrido un error al obtener tus estadísticas. Inténtalo de nuevo", "danger")
+
     return render_template('profile.html', form=form, active_page='profile', createdConvs=createdConvs, promptCalls=promptCalls)
 
 
@@ -127,8 +147,9 @@ def profile():
 @login_required
 def deleteUser():
     userID = str(format(current_user.id, '032x'))
-    deleteUserPOST = requests.delete(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/deleteUser/{userID}')
-    if deleteUserPOST.status_code == 200:
+    response = requests.delete(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/deleteUser/{userID}')
+
+    if response.status_code == 200:
         users.remove(current_user)
         logout_user()
         return redirect(url_for('index'))
@@ -141,8 +162,8 @@ def deleteUser():
 def conversation():
     convName = session['convName']
     convID = session['convID']
-    dialogues = session.get('messages', None)
-    logging.info("DIALOGUES: " + str(dialogues))
+    dialogues = session.get('messages', None) # Es posible que se trate de una nueva conversación y no existan mensajes
+
     if not convName or not convID:
         flash("Esta conversación no existe.", "danger")
         return redirect(url_for('index'))
@@ -155,8 +176,8 @@ def conversation():
 def conversationLog():
     convName = session['convName']
     convID = session['convID']
-    dialogues = session.get('messages', None)
-    logging.info("DIALOGUES: " + str(dialogues))
+    dialogues = session.get('messages', None) # Es posible que se trate de una conversación en la que no existan mensajes
+
     if not convName or not convID:
         flash("Esta conversación no existe.", "danger")
         return redirect(url_for('index'))
@@ -169,12 +190,17 @@ def conversationLog():
 def endConversation():
     userID = str(format(current_user.id, '032x'))
     convID = request.json.get('convID')
-    endConvPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}/end')
-    if endConvPOST.status_code == 200:
+    response = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}/end')
+
+    if response.status_code == 200:
+        session.pop('convID', None) # Eliminamos todos los datos de la conversación del diccionario
+        session.pop('convName', None)
+        session.pop('next', None)
+        session.pop('end', None)
+        session.pop('messages', None)
         return jsonify({"status": "ok"}), 200
     else:
-        resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
-        return resp
+        return make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
     
 
 @app.route('/delConv', methods=['DELETE'])
@@ -182,26 +208,31 @@ def endConversation():
 def delConversation():
     userID = str(format(current_user.id, '032x'))
     convID = request.json.get('convID')
-    delConvDEL = requests.delete(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}/del')
-    logging.info(delConvDEL.status_code)
-    if delConvDEL.status_code == 200:
+    response = requests.delete(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}/del')
+
+    if response.status_code == 200:
+        session.pop('convID', None) # Eliminamos todos los datos de la conversación del diccionario
+        session.pop('convName', None)
+        session.pop('next', None)
+        session.pop('end', None)
+        session.pop('messages', None)
         return jsonify({"status": "ok"}), 200
     else:
-        resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
-        return resp
+        return make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
     
 
 @app.route('/delAllConvs', methods=['DELETE'])
 @login_required
 def delAllConvs():
     userID = str(format(current_user.id, '032x'))
-    delAllConvsDEL = requests.delete(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/delAllConvs')
-    logging.info(delAllConvsDEL.status_code)
-    if delAllConvsDEL.status_code == 200:
+    response = requests.delete(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/delAllConvs')
+
+    if response.status_code == 200:
+        flash('Se han eliminado todas las conversaciones', 'success')
         return jsonify({"status": "ok"}), 200
     else:
-        resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
-        return resp
+        flash('No hay conversaciones para eliminar', 'danger')
+        return make_response(jsonify({"error": "No hay conversaciones disponibles"}), 204)
     
 
 @app.route('/sendPrompt', methods=['POST'])
@@ -212,12 +243,12 @@ def sendPrompt():
     timestamp = datetime.now()
     timestamp = datetime.timestamp(timestamp)
     timestamp = round(timestamp * 1000)
-    json = {'userID': userID, 'convID': session['convID'], 'prompt': request.json.get('prompt'), 'timestamp': timestamp}
-    sendPromptPOST = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service{nextURL}', json=json)
-    if sendPromptPOST.status_code == 200:
-       logging.info(sendPromptPOST.json())
-       return sendPromptPOST.json()
-    elif sendPromptPOST.status_code == 204:
+    requestJSON = {'userID': userID, 'convID': session['convID'], 'prompt': request.json.get('prompt'), 'timestamp': timestamp}
+    response = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service{nextURL}', json=requestJSON)
+
+    if response.status_code == 200:
+       return response.json()
+    elif response.status_code == 204:
         flash("Error: esta conversación aún no está lista para mandar más mensajes", "danger")
         return make_response('', 204)
 
@@ -227,15 +258,16 @@ def sendPrompt():
 def getConvData():
     userID = str(format(current_user.id, '032x'))
     convID = request.json.get('convID')
-    getConvDataGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}')
-    if getConvDataGET.status_code == 200:
-        session['convID'] = getConvDataGET.json().get('convID')
-        session['convName'] = getConvDataGET.json().get('convName')
-        session['next'] = getConvDataGET.json().get('nextURL')
-        session['end'] = getConvDataGET.json().get('endURL')
-        session['messages'] = getConvDataGET.json().get('dialogues')
-        logging.info(getConvDataGET.json())
-        return jsonify({"status": getConvDataGET.json().get('status')}), 200
+    response = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}')
+
+    if response.status_code == 200:
+        responseJSON = response.json()
+        session['convID'] = responseJSON.get('convID')
+        session['convName'] = responseJSON.get('convName')
+        session['next'] = responseJSON.get('nextURL')
+        session['end'] = responseJSON.get('endURL')
+        session['messages'] = responseJSON.get('dialogues')
+        return jsonify({"status": responseJSON.get('status')}), 200
     else:
         resp = make_response(jsonify({"error": "Ha ocurrido un error. Inténtalo de nuevo"}), 500)
         return resp
@@ -245,9 +277,10 @@ def getConvData():
 @login_required
 def allConversations():
     userID = str(format(current_user.id, '032x'))
-    getConvGET = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue')
-    if getConvGET.status_code == 200:
-        allConvs = getConvGET.json().get('allConvs', None)
+    response = requests.get(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue')
+
+    if response.status_code == 200:
+        allConvs = response.json().get('allConvs', None)
     else:
         allConvs = None
     
@@ -257,6 +290,12 @@ def allConversations():
 @app.route('/logout')
 @login_required
 def logout():
+    # Si un usuario cierra sesión, no debe quedar información sobre otras conversaciones
+    session.pop('convID', None)
+    session.pop('convName', None)
+    session.pop('next', None)
+    session.pop('end', None)
+    session.pop('messages', None)
     logout_user()
     return redirect(url_for('index'))
 
