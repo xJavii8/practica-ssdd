@@ -188,9 +188,8 @@ def conversationLog():
 @app.route('/endConv', methods=['POST'])
 @login_required
 def endConversation():
-    userID = str(format(current_user.id, '032x'))
-    convID = request.json.get('convID')
-    response = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service/u/{userID}/dialogue/{convID}/end')
+    endURL = session['end']
+    response = requests.post(f'http://{os.environ.get("REST_SERVER", "backend-rest")}:8080/Service{endURL}')
 
     if response.status_code == 200:
         session.pop('convID', None) # Eliminamos todos los datos de la conversación del diccionario
