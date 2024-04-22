@@ -37,7 +37,7 @@ services:
   backend-rest-extern:
     build: backend-rest/es.um.sisdist.backend.ServiceExtern/.
     ports:
-      - 8088:8080
+      - 8188:8080
     env_file: mongo.env
 
   backend-grpc:
