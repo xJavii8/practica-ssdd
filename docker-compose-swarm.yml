@@ -1,0 +1,42 @@
+version: '3.1'
+services:
+
+  ssdd-frontend:
+    image: 127.0.0.1:5000/ssdd-frontend
+    ports:
+      - 5010:5010
+    env_file: mongo.env
+    environment:
+      - FLASK_APP=app/app.py
+      - FLASK_DEBUG=true
+      - PORT=5010
+
+  ssdd-llamachat:
+    image: dsevilla/ssdd-llamachat:1.0
+    hostname: llamachat
+    ports:
+      - 5020:5020
+
+  db-mongo:
+    image: 127.0.0.1:5000/ssdd_db-mongo
+    restart: always
+    ports:
+      - 27017:27017 
+    env_file: mongo.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=ssdd
+
+  backend-rest:
+    image: 127.0.0.1:5000/ssdd_backend-rest
+    ports:
+      - 8080:8080
+    env_file: mongo.env
+
+  backend-grpc:
+    image: 127.0.0.1:5000/ssdd_backend-grpc
+    ports:
+      - 50051:50051
+    env_file: mongo.env
+
