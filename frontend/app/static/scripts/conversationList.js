@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('delAllConv').addEventListener('click', function() {
-        document.getElementById('confirmationDialog').style.display = 'flex';
+        document.getElementById('confirmationDialog').style.display = 'flex'; // Diálogo de confirmación para eliminar todas las conversaciones
     });
 
     document.getElementById('confirmDel').addEventListener('click', function() {
@@ -14,13 +14,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Algo salió mal al eliminar la conversación.');
+            if (!response.ok && response.status !== 204) {
+                throw new Error('Algo salió mal al eliminar las conversaciones.');
             }
-            return response.json();
+
+            return;
         })
         .then(data => {
-            window.location.href = '/allConversations';
+            window.location.reload();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -35,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll('.conversation-name').forEach(item => {
         item.addEventListener('click', () => {
+            // Obtenemos la información de la conversación
             const convID = item.getAttribute('data-convID');
             fetch('/getConvData', {
                 method: 'POST',
@@ -51,8 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return response.json();
             })
             .then(data => {
-                console.log(data)
-                if(data.status === 3) {
+                if(data.status === 3) { // Si la conversación está terminada lo enviamos a conversationLog, sino, a conversation
                     window.location.href = '/conversationLog';
                 } else {
                     window.location.href = '/conversation';

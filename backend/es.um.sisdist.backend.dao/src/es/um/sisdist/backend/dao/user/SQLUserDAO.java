@@ -159,12 +159,6 @@ public class SQLUserDAO implements IUserDAO {
     }
 
     @Override
-    public boolean checkIfConvExists(String userID, String convID) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'checkIfConvExists'");
-    }
-
-    @Override
     public Optional<Conversation> getConvByID(String userID, String convID) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getConvByID'");

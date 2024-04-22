@@ -12,6 +12,10 @@
     padding: 10px;
 }
 
+.conversations-list.empty p {
+    margin-top: 1rem;
+}
+
 .conversation-item {
     border-bottom: 1px solid #eee;
     padding: 10px 5px;
@@ -86,3 +90,34 @@
     text-align: center;
     height: 100%;
 }
+
+.alert-container {
+    text-align: center;
+}
+
+.alert {
+    padding: 10px;
+    margin-top: 20px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.alert .btn-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem;
+}
+  

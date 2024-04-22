@@ -110,13 +110,22 @@ public class AppLogicImpl {
     // posteriormente. Se comprueba que el email no este en uso
     public Optional<User> createUser(String email, String name, String pass) {
         Optional<User> u = dao.getUserByEmail(email);
-
         if (!u.isPresent()) {
             u = dao.crearUser(email, pass, name);
             if (u.isPresent()) {
                 return u;
             }
         }
+
+        return Optional.empty();
+    }
+
+    public Optional<User> modifyUser(String actualEmail, String newMail, String name, String password) {
+        Optional<User> u = dao.getUserByEmail(actualEmail);
+        if (u.isPresent()) {
+            return dao.modifyUser(u.get().getId(), actualEmail, newMail, name, password);
+        }
+
         return Optional.empty();
     }
 
@@ -124,23 +133,9 @@ public class AppLogicImpl {
         return dao.deleteUser(id);
     }
 
-    public Optional<Conversation> createConversation(String userID, String name) {
-        boolean convExists = dao.checkIfConvExists(userID, name);
-        if (convExists == false) {
-            Optional<Conversation> c = dao.createConversation(userID, name);
-            if (!c.isPresent()) {
-                return Optional.empty();
-            }
-
-            return c;
-        }
-
-        return Optional.empty();
-    }
-
     public Optional<UserStatsDTO> getUserStats(String userID) {
         Optional<User> u = dao.getUserById(userID);
-        if(u.isPresent()) {
+        if (u.isPresent()) {
             User user = u.get();
             int numConvs = user.getCreatedConvs();
             int promptCalls = user.getPromptCalls();
@@ -150,10 +145,20 @@ public class AppLogicImpl {
         return Optional.empty();
     }
 
+    public Optional<Conversation> createConversation(String userID, String name) {
+        Optional<Conversation> c = dao.createConversation(userID, name);
+        if (!c.isPresent()) {
+            return Optional.empty();
+        }
+
+        return c;
+    }
+
     public Optional<List<ConvSummaryDTO>> getConversations(String userID) {
         Optional<User> u = dao.getUserById(userID);
         if (u.isPresent()) {
             User user = u.get();
+            // Creamos un resumen de las conversaciones para reducir la cantidad de datos a enviar
             return Optional.of(user.getConversations().stream()
                     .map(conversation -> new ConvSummaryDTO(conversation.getName(), conversation.getStatus(),
                             conversation.getID()))
@@ -185,10 +190,11 @@ public class AppLogicImpl {
     }
 
     public boolean isConvReady(String userID, String convID) {
+        // Comprobamos si la conversación está lista para recibir más mensajes
         Optional<Conversation> c = dao.getConvByID(userID, convID);
-        if(c.isPresent()) {
+        if (c.isPresent()) {
             Conversation conv = c.get();
-            if(conv.getStatus() == Conversation.READY) {
+            if (conv.getStatus() == Conversation.READY) {
                 return true;
             }
         }
@@ -197,31 +203,20 @@ public class AppLogicImpl {
     }
 
     public Optional<Conversation> sendPrompt(String userID, String convID, String prompt, long timestamp) {
-        dao.updatePromptCalls(userID);
+        dao.updatePromptCalls(userID); // Actualización de estadísticas
         POSTRequest req1 = POSTRequest.newBuilder().setPrompt(prompt).build();
         POSTResponse resp1;
 
         try {
-            resp1 = blockingStub.promptPOST(req1);
-            dao.createDialogue(userID, convID, resp1.getLocalization().split("/")[2], prompt, timestamp);
+            resp1 = blockingStub.promptPOST(req1); // POST a LlamaChat
+            dao.createDialogue(userID, convID, resp1.getLocalization().split("/")[2], prompt, timestamp); // Creación del diálogo
             GETRequest req2 = GETRequest.newBuilder().setAnswerURL(resp1.getLocalization()).setIdConversation(convID)
-                    .setIdUser(userID).build();
-
+                    .setIdUser(userID).build(); // GET para la respuesta
             blockingStub.promptGET(req2);
-
         } catch (StatusRuntimeException e) {
             return Optional.empty();
-
         }
 
         return dao.getConvByID(userID, convID);
-    }
-
-    public Optional<User> modifyUser(String actualEmail, String newMail, String name, String password) {
-        Optional<User> u = dao.getUserByEmail(actualEmail);
-        if (u.isPresent()) {
-            return dao.modifyUser(u.get().getId(), actualEmail, newMail, name, password);
-        }
-        return Optional.empty();
     }
 }

@@ -72,4 +72,11 @@ button {
     background-color: #f8d7da;
     border-color: #f5c6cb;
 }
+
+.alert .btn-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem;
+}
   

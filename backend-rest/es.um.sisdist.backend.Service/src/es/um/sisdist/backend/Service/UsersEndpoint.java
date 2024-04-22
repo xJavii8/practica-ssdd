@@ -149,10 +149,10 @@ public class UsersEndpoint {
         boolean ended = impl.endConversation(id, convID);
 
         if (ended == true) {
-            return Response.status(200).build();
+            return Response.status(Status.OK).build();
         }
 
-        return Response.status(500).build();
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     @DELETE
@@ -163,10 +163,10 @@ public class UsersEndpoint {
         boolean deleted = impl.delConversation(id, convID);
 
         if (deleted == true) {
-            return Response.status(200).build();
+            return Response.status(Status.OK).build();
         }
 
-        return Response.status(500).build();
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     @DELETE
@@ -177,10 +177,10 @@ public class UsersEndpoint {
         boolean deleted = impl.delAllConvs(id);
 
         if (deleted == true) {
-            return Response.status(200).build();
+            return Response.status(Status.OK).build();
         }
 
-        return Response.status(500).build();
+        return Response.status(Status.NO_CONTENT).build();
     }
 
     @POST
@@ -193,9 +193,9 @@ public class UsersEndpoint {
                     pDTO.getTimestamp());
 
             if (c.isPresent()) {
-                return Response.status(200).entity(c.get()).build();
+                return Response.status(Status.OK).entity(c.get()).build();
             }
-            return Response.status(404).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
 
         return Response.status(Status.NO_CONTENT).build();
