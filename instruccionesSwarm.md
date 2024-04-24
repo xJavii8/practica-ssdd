@@ -57,7 +57,7 @@ Nos unimos al manager con el comando que nos da el manager al hacer docker swarm
 docker swarm join --token <TOKEN> <IP>:2377
 ```
 
-Nos metemos al navegador y ponemos la siguiente URL: ```<IP-MANAGER>:5010```, y ya estaría funcionando
+Nos metemos al navegador y ponemos la siguiente URL: ```localhost:5010```, y debería funcionar correctamente el frontend. Si sales del docker swarm, no funcionará
 
 ## Resolución de problemas
 
