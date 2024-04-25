@@ -80,7 +80,7 @@ def register():
         userEmail = responseJSON['email']
         userToken = responseJSON['token']
     else:
-        print("\033[91mHa ocurrido un error al hacer el registro. Por favor, inténtalo de nuevo\033[0m")
+        print("\033[91mHa ocurrido un error al hacer el registro. Por favor, inténtalo de nuevo\033[0m\n")
 
 def login():
     global userID
@@ -99,7 +99,7 @@ def login():
         userEmail = responseJSON['email']
         userToken = responseJSON['token']
     else:
-        print("\033[91mHa ocurrido un error al iniciar sesión. Por favor, inténtalo de nuevo\033[0m")
+        print("\033[91mHa ocurrido un error al iniciar sesión. Por favor, inténtalo de nuevo\033[0m\n")
 
 def createConv():
     print("\nOpción elegida: \033[92mcrear una conversación\033[0m.")
@@ -110,6 +110,32 @@ def checkConvList():
 
 def checkUserData():
     print("\nOpción elegida: \033[92mver mis datos y estadísticas\033[0m.")
+
+    url = EXTERNAL_SERVICE_URL + f"u/{userID}/stats"
+    currentDate = datetime.datetime.now().strftime("%Y-%m-%d")
+    authToken = genAuthToken(url, currentDate, userToken)
+
+    headers = {
+        "User": userID,
+        "Date": currentDate,
+        "Auth-Token": authToken
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        statsJSON = response.json()
+        createdConvs = statsJSON.get('createdConvs', 0)
+        promptCalls = statsJSON.get('promptCalls', 0)
+    else:
+        print("\033[91mHa ocurrido un error al obtener tus estadísticas.\033[0m")
+        createdConvs = 0
+        promptCalls = 0
+
+    print(f"Email actual: {userEmail}")
+    print(f"Nombre de usuario: {username}")
+    print(f"Conversaciones creadas: {createdConvs}")
+    print(f"Llamadas al prompt: {promptCalls}\n")
 
 def deleteUser():
     print("\nOpción elegida: \033[92meliminar mi usuario\033[0m.")
@@ -131,15 +157,13 @@ def deleteUser():
             "Auth-Token": authToken
         }
 
-        print(headers)
-
         response = requests.delete(url, headers=headers)
         if response.status_code == 200:
             print("Usuario \033[92meliminado\033[0m. Gracias por usar este servicio.")
             print("\033[91mSaliendo...\033[0m")
             sys.exit()
         else:
-            print("\033[91mHa ocurrido un error al eliminar el usuario. Por favor, inténtalo de nuevo\033[0m")
+            print("\033[91mHa ocurrido un error al eliminar el usuario. Por favor, inténtalo de nuevo\033[0m\n")
     elif choice == "2":
         return
     else:
