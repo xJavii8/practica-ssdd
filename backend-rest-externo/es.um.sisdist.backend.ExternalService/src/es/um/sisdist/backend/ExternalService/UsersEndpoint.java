@@ -39,8 +39,20 @@ public class UsersEndpoint {
     @GET
     @Path("/{username}")
     @Produces(MediaType.APPLICATION_JSON)
-    public UserDTO getUserInfo(@PathParam("username") String username) {
-        return UserDTOUtils.toDTO(impl.getUserByEmail(username).orElse(null));
+    public UserDTO getUserInfo(@PathParam("username") String username, @Context UriInfo ui, @Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+        String URI = ui.getRequestUri().toString();
+        String userHeader = headerParams.getFirst("user");
+        String dateHeader = headerParams.getFirst("date");
+        String authTokenHeader = headerParams.getFirst("auth-token");
+
+        boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
+
+        if (auth) {
+            return UserDTOUtils.toDTO(impl.getUserByEmail(username).orElse(null));
+        } else {
+            return new UserDTO();
+        }
     }
 
     @POST
@@ -70,7 +82,7 @@ public class UsersEndpoint {
 
         boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
 
-        if(auth) {
+        if (auth) {
             boolean deleted = impl.deleteUser(id);
 
             if (deleted) {
@@ -87,43 +99,77 @@ public class UsersEndpoint {
     @Path("{id}/dialogue")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createConv(@PathParam("id") String id, ConvDTO cDTO) {
-        Optional<Conversation> conv = impl.createConversation(id, cDTO.getConvName());
+    public Response createConv(@PathParam("id") String id, ConvDTO cDTO, @Context UriInfo ui, @Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+        String URI = ui.getRequestUri().toString();
+        String userHeader = headerParams.getFirst("user");
+        String dateHeader = headerParams.getFirst("date");
+        String authTokenHeader = headerParams.getFirst("auth-token");
 
-        if (!conv.isPresent()) {
-            return Response.status(Status.NO_CONTENT).build();
+        boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
+
+        if (auth) {
+            Optional<Conversation> conv = impl.createConversation(id, cDTO.getConvName());
+
+            if (!conv.isPresent()) {
+                return Response.status(Status.NO_CONTENT).build();
+            }
+
+            UriBuilder builder = UriBuilder.fromResource(UsersEndpoint.class).path("{id}/dialogue/{name}");
+            Conversation c = conv.get();
+            return Response.created(builder.build(id, c.getID())).entity(c).status(Status.CREATED).build();
+        } else {
+            return Response.status(Status.UNAUTHORIZED).build();
         }
-
-        UriBuilder builder = UriBuilder.fromResource(UsersEndpoint.class).path("{id}/dialogue/{name}");
-        Conversation c = conv.get();
-        return Response.created(builder.build(id, c.getID())).entity(c).status(Status.CREATED).build();
     }
 
     @GET
     @Path("{id}/dialogue")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public AllConvsDTO getConvs(@PathParam("id") String id) {
+    public AllConvsDTO getConvs(@PathParam("id") String id, @Context UriInfo ui, @Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+        String URI = ui.getRequestUri().toString();
+        String userHeader = headerParams.getFirst("user");
+        String dateHeader = headerParams.getFirst("date");
+        String authTokenHeader = headerParams.getFirst("auth-token");
 
-        Optional<List<ConvSummaryDTO>> conv = impl.getConversations(id);
-        if (!conv.isPresent()) {
+        boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
+
+        if (auth) {
+
+            Optional<List<ConvSummaryDTO>> conv = impl.getConversations(id);
+            if (!conv.isPresent()) {
+                return new AllConvsDTO();
+            }
+
+            return AllConvsDTOUtils.toDTO(conv.get());
+        } else {
             return new AllConvsDTO();
         }
-
-        return AllConvsDTOUtils.toDTO(conv.get());
     }
 
     @GET
     @Path("{id}/stats")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public UserStatsDTO getUserStats(@PathParam("id") String id) {
-        Optional<UserStatsDTO> stats = impl.getUserStats(id);
+    public UserStatsDTO getUserStats(@PathParam("id") String id, @Context UriInfo ui, @Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+        String URI = ui.getRequestUri().toString();
+        String userHeader = headerParams.getFirst("user");
+        String dateHeader = headerParams.getFirst("date");
+        String authTokenHeader = headerParams.getFirst("auth-token");
 
-        if (stats.isPresent()) {
-            return stats.get();
+        boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
+
+        if (auth) {
+            Optional<UserStatsDTO> stats = impl.getUserStats(id);
+
+            if (stats.isPresent()) {
+                return stats.get();
+            }
+
         }
-
         return new UserStatsDTO();
     }
 
@@ -131,74 +177,137 @@ public class UsersEndpoint {
     @Path("{id}/dialogue/{convID}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ConvDTO getConvData(@PathParam("id") String id, @PathParam("convID") String convID) {
-        Optional<Conversation> c = impl.getConversationData(id, convID);
+    public ConvDTO getConvData(@PathParam("id") String id, @PathParam("convID") String convID, @Context UriInfo ui,
+            @Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+        String URI = ui.getRequestUri().toString();
+        String userHeader = headerParams.getFirst("user");
+        String dateHeader = headerParams.getFirst("date");
+        String authTokenHeader = headerParams.getFirst("auth-token");
 
-        if (!c.isPresent()) {
+        boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
+
+        if (auth) {
+            Optional<Conversation> c = impl.getConversationData(id, convID);
+
+            if (!c.isPresent()) {
+                return new ConvDTO();
+            }
+
+            return ConvDTOUtils.toDTO(c.get());
+        } else {
             return new ConvDTO();
         }
-
-        return ConvDTOUtils.toDTO(c.get());
     }
 
     @POST
     @Path("{id}/dialogue/{convID}/end")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response endConversation(@PathParam("id") String id, @PathParam("convID") String convID) {
-        boolean ended = impl.endConversation(id, convID);
+    public Response endConversation(@PathParam("id") String id, @PathParam("convID") String convID, @Context UriInfo ui,
+            @Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+        String URI = ui.getRequestUri().toString();
+        String userHeader = headerParams.getFirst("user");
+        String dateHeader = headerParams.getFirst("date");
+        String authTokenHeader = headerParams.getFirst("auth-token");
 
-        if (ended == true) {
-            return Response.status(Status.OK).build();
+        boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
+
+        if (auth) {
+            boolean ended = impl.endConversation(id, convID);
+
+            if (ended == true) {
+                return Response.status(Status.OK).build();
+            }
+
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        } else {
+            return Response.status(Status.UNAUTHORIZED).build();
         }
-
-        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     @DELETE
     @Path("{id}/dialogue/{convID}/del")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response delConversation(@PathParam("id") String id, @PathParam("convID") String convID) {
-        boolean deleted = impl.delConversation(id, convID);
+    public Response delConversation(@PathParam("id") String id, @PathParam("convID") String convID, @Context UriInfo ui,
+            @Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+        String URI = ui.getRequestUri().toString();
+        String userHeader = headerParams.getFirst("user");
+        String dateHeader = headerParams.getFirst("date");
+        String authTokenHeader = headerParams.getFirst("auth-token");
 
-        if (deleted == true) {
-            return Response.status(Status.OK).build();
+        boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
+
+        if (auth) {
+            boolean deleted = impl.delConversation(id, convID);
+
+            if (deleted == true) {
+                return Response.status(Status.OK).build();
+            }
+
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        } else {
+            return Response.status(Status.UNAUTHORIZED).build();
         }
-
-        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
     @DELETE
     @Path("{id}/delAllConvs")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response dellAllConvs(@PathParam("id") String id) {
-        boolean deleted = impl.delAllConvs(id);
+    public Response dellAllConvs(@PathParam("id") String id, @Context UriInfo ui, @Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+        String URI = ui.getRequestUri().toString();
+        String userHeader = headerParams.getFirst("user");
+        String dateHeader = headerParams.getFirst("date");
+        String authTokenHeader = headerParams.getFirst("auth-token");
 
-        if (deleted == true) {
-            return Response.status(Status.OK).build();
+        boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
+
+        if (auth) {
+            boolean deleted = impl.delAllConvs(id);
+
+            if (deleted == true) {
+                return Response.status(Status.OK).build();
+            }
+
+            return Response.status(Status.NO_CONTENT).build();
+        } else {
+            return Response.status(Status.UNAUTHORIZED).build();
         }
-
-        return Response.status(Status.NO_CONTENT).build();
     }
 
     @POST
     @Path("{id}/dialogue/{convID}/next/{timestamp}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response sendPrompt(PromptDTO pDTO) {
-        if (impl.isConvReady(pDTO.getUserID(), pDTO.getConvID())) {
-            Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt(),
-                    pDTO.getTimestamp());
+    public Response sendPrompt(PromptDTO pDTO, @Context UriInfo ui, @Context HttpHeaders hh) {
+        MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
+        String URI = ui.getRequestUri().toString();
+        String userHeader = headerParams.getFirst("user");
+        String dateHeader = headerParams.getFirst("date");
+        String authTokenHeader = headerParams.getFirst("auth-token");
 
-            if (c.isPresent()) {
-                return Response.status(Status.OK).entity(c.get()).build();
+        boolean auth = impl.checkUserAuth(userHeader, dateHeader, authTokenHeader, URI);
+
+        if (auth) {
+            if (impl.isConvReady(pDTO.getUserID(), pDTO.getConvID())) {
+                Optional<Conversation> c = impl.sendPrompt(pDTO.getUserID(), pDTO.getConvID(), pDTO.getPrompt(),
+                        pDTO.getTimestamp());
+
+                if (c.isPresent()) {
+                    return Response.status(Status.OK).entity(c.get()).build();
+                }
+                return Response.status(Status.NOT_FOUND).build();
             }
-            return Response.status(Status.NOT_FOUND).build();
-        }
 
-        return Response.status(Status.NO_CONTENT).build();
+            return Response.status(Status.NO_CONTENT).build();
+        } else {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
     }
 
 }
