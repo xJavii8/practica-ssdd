@@ -111,7 +111,7 @@ function addMessage(sender, text) {
 
     const imgDiv = document.createElement('div');
     imgDiv.classList.add('image');
-    imgDiv.style.backgroundImage = sender === 'user' ? "url('/static/images/userIcon.png')" : "url('/static/mainIcon.webp')";
+    imgDiv.style.backgroundImage = sender === 'user' ? "url('/static/images/userIcon.png')" : "url('/static/images/mainIcon.webp')";
 
     const textDiv = document.createElement('div');
     textDiv.classList.add('text');
