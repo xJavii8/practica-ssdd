@@ -157,7 +157,7 @@ def deleteUser():
         flash('Ha ocurrido un error. Inténtalo de nuevo', 'danger')
         return redirect(url_for('profile'))
     
-@app.route('/conversation', methods=['GET', 'POST'])
+@app.route('/conversation', methods=['GET'])
 @login_required
 def conversation():
     convName = session['convName']
@@ -171,7 +171,7 @@ def conversation():
         return render_template('conversation.html', active_page='conversation', convName=convName, convID=convID, dialogues=dialogues)
 
 
-@app.route('/conversationLog', methods=['GET', 'POST'])
+@app.route('/conversationLog', methods=['GET'])
 @login_required
 def conversationLog():
     convName = session['convName']
