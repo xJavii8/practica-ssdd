@@ -173,7 +173,7 @@ public class UsersEndpoint {
     @Path("{id}/delAllConvs")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response dellAllConvs(@PathParam("id") String id) {
+    public Response delAllConvs(@PathParam("id") String id) {
         boolean deleted = impl.delAllConvs(id);
 
         if (deleted == true) {
