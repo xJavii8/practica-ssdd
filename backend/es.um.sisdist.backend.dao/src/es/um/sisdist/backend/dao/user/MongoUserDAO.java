@@ -182,6 +182,7 @@ public class MongoUserDAO implements IUserDAO {
         return Optional.empty();
     }
 
+    @Override
     public Optional<Conversation> getConvByID(String userID, String convID) {
         Optional<User> u = getUserById(userID);
 
