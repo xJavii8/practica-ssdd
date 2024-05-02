@@ -258,7 +258,7 @@ public class UsersEndpoint {
     @Path("{id}/delAllConvs")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response dellAllConvs(@PathParam("id") String id, @Context UriInfo ui, @Context HttpHeaders hh) {
+    public Response delAllConvs(@PathParam("id") String id, @Context UriInfo ui, @Context HttpHeaders hh) {
         MultivaluedMap<String, String> headerParams = hh.getRequestHeaders();
         String URI = ui.getRequestUri().toString();
         String userHeader = headerParams.getFirst("user");

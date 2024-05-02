@@ -31,6 +31,7 @@ Y les creamos un tag de la siguiente forma:
 docker tag <ID-IMAGEN> 127.0.0.1:5000/ssdd-frontend
 docker tag <ID-IMAGEN> 127.0.0.1:5000/ssdd_db-mongo
 docker tag <ID-IMAGEN> 127.0.0.1:5000/ssdd_backend-rest
+docker tag <ID-IMAGEN> 127.0.0.1:5000/ssdd_backend-rest-externo
 docker tag <ID-IMAGEN> 127.0.0.1:5000/ssdd_backend-grpc
 ```
 
@@ -40,6 +41,7 @@ Les hacemos un push:
 docker push 127.0.0.1:5000/ssdd-frontend
 docker push 127.0.0.1:5000/ssdd_db-mongo
 docker push 127.0.0.1:5000/ssdd_backend-rest
+docker push 127.0.0.1:5000/ssdd_backend-rest-externo
 docker push 127.0.0.1:5000/ssdd_backend-grpc
 ```
 

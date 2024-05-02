@@ -5,6 +5,7 @@ package es.um.sisdist.backend.ExternalService.impl;
 
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Optional;
@@ -217,7 +218,8 @@ public class AppLogicImpl {
         Optional<User> u = getUserById(userID);
         if(u.isPresent()) {
             User user = u.get();
-            LocalDate dateObj = LocalDate.now();
+            ZoneId zoneId = ZoneId.of("Europe/Madrid");
+            LocalDate dateObj = LocalDate.now(zoneId);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String currentDate = dateObj.format(formatter);
 
