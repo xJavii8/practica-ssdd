@@ -35,7 +35,7 @@ services:
     env_file: mongo.env
 
   backend-rest-externo:
-    build: 127.0.0.1:5000/ssdd_backend-rest-externo
+    image: 127.0.0.1:5000/ssdd_backend-rest-externo
     ports:
       - 8180:8180
     env_file: mongo.env
